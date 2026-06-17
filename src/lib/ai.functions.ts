@@ -64,7 +64,8 @@ CRITICAL RULES:
     });
 
     const clean = text.trim().replace(/^["'`]+|["'`]+$/g, "").slice(0, 280);
-    await supabase.from("messages").insert({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("messages").insert({
       room_id: data.roomId,
       player_id: ai.id,
       content: clean,
@@ -103,7 +104,7 @@ CRITICAL RULES:
           };
         })
         .filter((r): r is NonNullable<typeof r> => r !== null);
-      if (rows.length) await supabase.from("suspicion_scores").insert(rows);
+      if (rows.length) await supabaseAdmin.from("suspicion_scores").insert(rows);
     } catch (e) {
       console.error("suspicion update failed", e);
     }
@@ -141,9 +142,9 @@ export const aiVote = createServerFn({ method: "POST" })
         }
       }
       if (!target) continue;
-      // accomplice AI votes for a non-accomplice
-      await supabase.from("votes").delete().eq("room_id", data.roomId).eq("round", room.current_round).eq("voter_player_id", ai.id);
-      await supabase.from("votes").insert({
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("votes").delete().eq("room_id", data.roomId).eq("round", room.current_round).eq("voter_player_id", ai.id);
+      await supabaseAdmin.from("votes").insert({
         room_id: data.roomId,
         round: room.current_round,
         voter_player_id: ai.id,
