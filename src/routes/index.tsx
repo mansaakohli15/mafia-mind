@@ -69,8 +69,8 @@ function Index() {
           <a href="#roles" className="hover:text-primary transition-colors">Roles</a>
           <a href="#why" className="hover:text-primary transition-colors">Why It Matters</a>
         </nav>
-        <Button variant="outline" size="sm" className="font-type tracking-widest text-xs uppercase border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground">
-          Sign In
+        <Button asChild variant="outline" size="sm" className="font-type tracking-widest text-xs uppercase border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground">
+          <Link to="/auth">Sign In</Link>
         </Button>
       </header>
 
@@ -95,12 +95,12 @@ function Index() {
 
             <div className="flex flex-col sm:flex-row gap-3 mb-12">
               <Button asChild size="lg" className="font-type tracking-widest text-xs uppercase h-14 px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-8px_oklch(0.78_0.17_70/0.6)]">
-                <Link to="/">
+                <Link to="/lobby">
                   <Plus className="size-4 mr-2" /> Open New Case
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="font-type tracking-widest text-xs uppercase h-14 px-8 border-foreground/20 hover:bg-foreground/5">
-                <Link to="/">
+                <Link to="/lobby">
                   <KeyRound className="size-4 mr-2" /> Enter With Code
                 </Link>
               </Button>
@@ -227,7 +227,7 @@ function Index() {
             is the one that <span className="italic text-primary">sounds</span> human.
           </h2>
           <Button asChild size="lg" className="font-type tracking-widest text-xs uppercase h-14 px-10 bg-primary text-primary-foreground hover:bg-primary/90">
-            <Link to="/">Begin Interrogation</Link>
+            <Link to="/auth">Begin Interrogation</Link>
           </Button>
         </div>
       </section>

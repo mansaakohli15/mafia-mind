@@ -14,16 +14,276 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          phase: Database["public"]["Enums"]["room_status"]
+          player_id: string
+          room_id: string
+          round: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          phase?: Database["public"]["Enums"]["room_status"]
+          player_id: string
+          room_id: string
+          round?: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          phase?: Database["public"]["Enums"]["room_status"]
+          player_id?: string
+          room_id?: string
+          round?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "room_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      room_players: {
+        Row: {
+          ai_persona: string | null
+          alive: boolean
+          created_at: string
+          display_name: string
+          id: string
+          is_ai: boolean
+          role: Database["public"]["Enums"]["player_role"]
+          room_id: string
+          seat: number
+          user_id: string | null
+        }
+        Insert: {
+          ai_persona?: string | null
+          alive?: boolean
+          created_at?: string
+          display_name: string
+          id?: string
+          is_ai?: boolean
+          role?: Database["public"]["Enums"]["player_role"]
+          room_id: string
+          seat: number
+          user_id?: string | null
+        }
+        Update: {
+          ai_persona?: string | null
+          alive?: boolean
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_ai?: boolean
+          role?: Database["public"]["Enums"]["player_role"]
+          room_id?: string
+          seat?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_players_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          ai_count: number
+          code: string
+          created_at: string
+          current_round: number
+          host_id: string
+          id: string
+          max_players: number
+          phase_ends_at: string | null
+          status: Database["public"]["Enums"]["room_status"]
+          updated_at: string
+        }
+        Insert: {
+          ai_count?: number
+          code: string
+          created_at?: string
+          current_round?: number
+          host_id: string
+          id?: string
+          max_players?: number
+          phase_ends_at?: string | null
+          status?: Database["public"]["Enums"]["room_status"]
+          updated_at?: string
+        }
+        Update: {
+          ai_count?: number
+          code?: string
+          created_at?: string
+          current_round?: number
+          host_id?: string
+          id?: string
+          max_players?: number
+          phase_ends_at?: string | null
+          status?: Database["public"]["Enums"]["room_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      suspicion_scores: {
+        Row: {
+          created_at: string
+          id: string
+          observer_player_id: string
+          reasoning: string | null
+          room_id: string
+          round: number
+          score: number
+          target_player_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          observer_player_id: string
+          reasoning?: string | null
+          room_id: string
+          round: number
+          score: number
+          target_player_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          observer_player_id?: string
+          reasoning?: string | null
+          room_id?: string
+          round?: number
+          score?: number
+          target_player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suspicion_scores_observer_player_id_fkey"
+            columns: ["observer_player_id"]
+            isOneToOne: false
+            referencedRelation: "room_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suspicion_scores_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suspicion_scores_target_player_id_fkey"
+            columns: ["target_player_id"]
+            isOneToOne: false
+            referencedRelation: "room_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      votes: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          round: number
+          target_player_id: string
+          voter_player_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          round: number
+          target_player_id: string
+          voter_player_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          round?: number
+          target_player_id?: string
+          voter_player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_target_player_id_fkey"
+            columns: ["target_player_id"]
+            isOneToOne: false
+            referencedRelation: "room_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_voter_player_id_fkey"
+            columns: ["voter_player_id"]
+            isOneToOne: false
+            referencedRelation: "room_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_room_host: { Args: { _room_id: string }; Returns: boolean }
+      is_room_member: { Args: { _room_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      player_role: "detective" | "suspect" | "accomplice" | "unassigned"
+      room_status: "lobby" | "day" | "night" | "voting" | "ended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +410,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      player_role: ["detective", "suspect", "accomplice", "unassigned"],
+      room_status: ["lobby", "day", "night", "voting", "ended"],
+    },
   },
 } as const
