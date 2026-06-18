@@ -209,7 +209,7 @@ function RoomPage() {
           <PlayerTable players={players} myId={me?.id} room={room} votes={votes} />
 
           {room.status === "ended" ? (
-            <EndScreen players={players} />
+            <EndScreen players={players} roomId={room.id} />
           ) : (
             <div className="bg-card/60 backdrop-blur border border-border rounded-sm h-[420px] flex flex-col">
               <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-3">
