@@ -8,6 +8,11 @@ const AI_PERSONAS = [
   { name: "Rook", persona: "blue-collar mechanic, blunt, suspicious of fancy talk" },
   { name: "Lila", persona: "warm bartender, defuses arguments, remembers small details" },
   { name: "Quentin", persona: "anxious accountant, over-explains, talks fast" },
+  { name: "Sable", persona: "cynical journalist, asks pointed questions, never commits to a side" },
+  { name: "Theo", persona: "quiet librarian, soft-spoken, drops surprising facts" },
+  { name: "Nyx", persona: "sarcastic art-school kid, dismissive but observant" },
+  { name: "Hux", persona: "retired colonel, formal, demands evidence before accusing" },
+  { name: "Mira", persona: "nurse, calm under pressure, watches for tells" },
 ];
 
 function genCode() {

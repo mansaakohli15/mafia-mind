@@ -209,7 +209,7 @@ function RoomPage() {
           <PlayerTable players={players} myId={me?.id} room={room} votes={votes} />
 
           {room.status === "ended" ? (
-            <EndScreen players={players} />
+            <EndScreen players={players} roomId={room.id} />
           ) : (
             <div className="bg-card/60 backdrop-blur border border-border rounded-sm h-[420px] flex flex-col">
               <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -400,9 +400,28 @@ function VotingPanel({ players, me, myVote, onVote }: { players: Player[]; me?: 
   );
 }
 
-function EndScreen({ players }: { players: Player[] }) {
+function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
   const aliveAI = players.filter((p) => p.is_ai && p.alive).length;
   const humansWin = aliveAI === 0;
+  const [heatmap, setHeatmap] = useState<Array<{ observer_player_id: string; target_player_id: string; score: number; round: number }>>([]);
+  useEffect(() => {
+    supabase
+      .from("suspicion_scores")
+      .select("observer_player_id, target_player_id, score, round")
+      .eq("room_id", roomId)
+      .then(({ data }) => setHeatmap(data ?? []));
+  }, [roomId]);
+
+  // Latest score per (observer, target)
+  const latest = new Map<string, number>();
+  for (const row of heatmap) {
+    const key = `${row.observer_player_id}:${row.target_player_id}`;
+    const prev = latest.get(key);
+    if (prev === undefined || row.round >= prev) latest.set(key, Number(row.score));
+  }
+  const aiPlayers = players.filter((p) => p.is_ai);
+  const targets = players.filter((p) => !p.is_ai || aiPlayers.length > 1);
+
   return (
     <div className="bg-card/60 backdrop-blur border border-border rounded-sm p-8 text-center">
       <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">Case Closed</div>
@@ -418,6 +437,55 @@ function EndScreen({ players }: { players: Player[] }) {
           </Badge>
         ))}
       </div>
+
+      {aiPlayers.length > 0 && latest.size > 0 && (
+        <div className="mt-10 text-left">
+          <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3 text-center">AI Suspicion Heatmap</div>
+          <p className="font-body text-xs text-muted-foreground/80 mb-4 text-center italic">
+            How suspicious the AI agents found every player — their private reasoning, revealed.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="mx-auto text-xs font-type border border-border/60">
+              <thead>
+                <tr className="bg-card/60">
+                  <th className="px-3 py-2 text-left tracking-widest uppercase text-muted-foreground">AI →</th>
+                  {targets.map((t) => (
+                    <th key={t.id} className="px-3 py-2 text-left tracking-wider text-muted-foreground/80">{t.display_name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {aiPlayers.map((ai) => (
+                  <tr key={ai.id} className="border-t border-border/40">
+                    <td className="px-3 py-2 text-accent tracking-wider">{ai.display_name}</td>
+                    {targets.map((t) => {
+                      const score = latest.get(`${ai.id}:${t.id}`);
+                      if (score === undefined || ai.id === t.id) {
+                        return <td key={t.id} className="px-3 py-2 text-muted-foreground/30">—</td>;
+                      }
+                      const intensity = Math.min(1, score / 100);
+                      return (
+                        <td key={t.id} className="px-3 py-2">
+                          <div
+                            className="px-2 py-1 rounded-sm border text-foreground inline-block min-w-[44px] text-center"
+                            style={{
+                              backgroundColor: `oklch(0.55 ${0.05 + 0.15 * intensity} 25 / ${0.15 + 0.55 * intensity})`,
+                              borderColor: `oklch(0.6 0.15 25 / ${0.3 + 0.5 * intensity})`,
+                            }}
+                          >
+                            {Math.round(score)}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <Link to="/lobby" className="inline-block mt-8 font-type tracking-widest text-xs uppercase text-primary hover:underline">
         ← Back to Lobby
       </Link>
