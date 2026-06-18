@@ -206,7 +206,7 @@ function RoomPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 grid lg:grid-cols-[1fr_360px] gap-6">
         {/* LEFT: chat + table */}
         <section className="space-y-4">
-          <PlayerTable players={players} myId={me?.id} room={room} />
+          <PlayerTable players={players} myId={me?.id} room={room} votes={votes} />
 
           {room.status === "ended" ? (
             <EndScreen players={players} />
@@ -324,7 +324,13 @@ function PhaseBanner({ room, secondsLeft }: { room: Room; secondsLeft: number | 
   );
 }
 
-function PlayerTable({ players, myId, room }: { players: Player[]; myId?: string; room: Room }) {
+function PlayerTable({ players, myId, room, votes }: { players: Player[]; myId?: string; room: Room; votes: Vote[] }) {
+  const voteCounts: Record<string, number> = {};
+  if (room.status === "voting") {
+    for (const v of votes) {
+      if (v.round === room.current_round) voteCounts[v.target_player_id] = (voteCounts[v.target_player_id] ?? 0) + 1;
+    }
+  }
   return (
     <div className="bg-card/40 backdrop-blur border border-border rounded-sm p-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -338,6 +344,11 @@ function PlayerTable({ players, myId, room }: { players: Player[]; myId?: string
               {p.user_id === room.host_id && <Crown className="size-3 text-primary" />}
               {!p.alive && <Skull className="size-3 text-destructive" />}
               <span className="truncate tracking-wider">{p.display_name}</span>
+              {voteCounts[p.id] ? (
+                <span className="ml-auto inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-destructive/20 border border-destructive/40 text-destructive text-[10px] font-bold">
+                  {voteCounts[p.id]}
+                </span>
+              ) : null}
             </div>
           </div>
         ))}
