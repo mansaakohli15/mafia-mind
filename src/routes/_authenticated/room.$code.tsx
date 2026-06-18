@@ -54,9 +54,11 @@ function RoomPage() {
   useEffect(() => {
     let roomId: string | null = null;
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
     (async () => {
       const { data: r } = await supabase.from("rooms").select("*").eq("code", code.toUpperCase()).maybeSingle();
       if (!r) { toast.error("Room not found"); navigate({ to: "/lobby" }); return; }
+      if (cancelled) return;
       roomId = r.id;
       setRoom(r);
       const [{ data: p }, { data: m }, { data: v }] = await Promise.all([
@@ -64,11 +66,12 @@ function RoomPage() {
         supabase.from("messages").select("*").eq("room_id", r.id).order("created_at"),
         supabase.from("votes").select("*").eq("room_id", r.id),
       ]);
+      if (cancelled) return;
       setPlayers(p ?? []);
       setMessages(m ?? []);
       setVotes(v ?? []);
 
-      channel = supabase.channel(`room:${r.id}`)
+      channel = supabase.channel(`room:${r.id}:${Math.random().toString(36).slice(2, 8)}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: `id=eq.${r.id}` },
           (payload) => { if (payload.new) setRoom(payload.new as Room); })
         .on("postgres_changes", { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${r.id}` },
@@ -85,7 +88,7 @@ function RoomPage() {
           })
         .subscribe();
     })();
-    return () => { if (channel) supabase.removeChannel(channel); void roomId; };
+    return () => { cancelled = true; if (channel) supabase.removeChannel(channel); void roomId; };
   }, [code, navigate]);
 
   // Timer tick
