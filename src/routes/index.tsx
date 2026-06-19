@@ -9,13 +9,13 @@ import evidenceBoard from "@/assets/evidence-board.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "DeceptionAI — Spot the AI Among Us" },
+      { title: "Mafia Mind — Spot the AI Among Us" },
       {
         name: "description",
         content:
           "A real-time social deduction game where one secret player is an AI agent. Lie, accuse, and survive — or be exposed.",
       },
-      { property: "og:title", content: "DeceptionAI — Spot the AI Among Us" },
+      { property: "og:title", content: "Mafia Mind — Spot the AI Among Us" },
       {
         property: "og:description",
         content:
@@ -61,7 +61,7 @@ function Index() {
             <Eye className="size-5 text-primary" strokeWidth={1.5} />
           </div>
           <span className="font-display text-xl tracking-tight">
-            Deception<span className="italic text-primary">AI</span>
+            Mafia<span className="italic text-primary">Mind</span>
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 font-type text-xs tracking-widest uppercase text-muted-foreground">
@@ -234,7 +234,7 @@ function Index() {
 
       <footer className="relative z-10 border-t border-border/40 px-6 sm:px-12 py-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 font-type text-[10px] tracking-[0.25em] uppercase text-muted-foreground/60">
-          <div>DeceptionAI · Case File © {new Date().getFullYear()}</div>
+          <div>Mafia Mind · Case File © {new Date().getFullYear()}</div>
           <div>All Suspects Are Innocent Until Voted Out</div>
         </div>
       </footer>

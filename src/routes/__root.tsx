@@ -79,10 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "DeceptionAI — Spot the AI Among Us" },
+      { title: "Mafia Mind — Spot the AI Among Us" },
       { name: "description", content: "A real-time social deduction game where one secret player is an AI agent. Lie, accuse, and survive — or be exposed." },
-      { name: "author", content: "DeceptionAI" },
-      { property: "og:title", content: "DeceptionAI — Spot the AI Among Us" },
+      { name: "author", content: "Mafia Mind" },
+      { property: "og:title", content: "Mafia Mind — Spot the AI Among Us" },
       { property: "og:description", content: "A real-time social deduction game where one secret player is an AI agent." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

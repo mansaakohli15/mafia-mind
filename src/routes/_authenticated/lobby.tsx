@@ -11,7 +11,7 @@ import { Eye, Plus, KeyRound, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/lobby")({
-  head: () => ({ meta: [{ title: "Lobby — DeceptionAI" }] }),
+  head: () => ({ meta: [{ title: "Lobby — Mafia Mind" }] }),
   component: Lobby,
 });
 
@@ -60,7 +60,7 @@ function Lobby() {
           <div className="size-9 rounded-sm bg-primary/15 border border-primary/40 grid place-items-center">
             <Eye className="size-5 text-primary" strokeWidth={1.5} />
           </div>
-          <span className="font-display text-xl tracking-tight">Deception<span className="italic text-primary">AI</span></span>
+          <span className="font-display text-xl tracking-tight">Mafia<span className="italic text-primary">Mind</span></span>
         </Link>
         <Button variant="ghost" size="sm" onClick={signOut} className="font-type tracking-widest text-xs uppercase text-muted-foreground">
           <LogOut className="size-3.5 mr-2" /> Sign out

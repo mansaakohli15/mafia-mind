@@ -1,4 +1,4 @@
-# Getting Started with DeceptionAI
+# Getting Started with Mafia Mind
 
 A beginner-friendly guide to running this project on your own machine, pushing it to GitHub, and deploying it.
 
