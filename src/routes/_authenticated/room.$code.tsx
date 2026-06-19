@@ -15,6 +15,7 @@ type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Player = Database["public"]["Tables"]["room_players"]["Row"];
 type Message = Database["public"]["Tables"]["messages"]["Row"];
 type Vote = Database["public"]["Tables"]["votes"]["Row"];
+type PlayerRole = Database["public"]["Enums"]["player_role"];
 
 export const Route = createFileRoute("/_authenticated/room/$code")({
   head: () => ({ meta: [{ title: "Investigation — Mafia Mind" }] }),
@@ -37,6 +38,7 @@ function RoomPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [votes, setVotes] = useState<Vote[]>([]);
+  const [myRole, setMyRole] = useState<PlayerRole | null>(null);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -126,6 +128,16 @@ function RoomPage() {
 
   const me = players.find((p) => p.user_id === userId);
   const isHost = room && userId === room.host_id;
+
+  // Fetch own role securely (other players' roles are not readable until the case ends)
+  useEffect(() => {
+    if (!room || !me) { setMyRole(null); return; }
+    if (room.status === "lobby" || room.status === "ended") { setMyRole(null); return; }
+    supabase.rpc("my_player_role", { _room_id: room.id }).then(({ data }) => {
+      setMyRole((data as PlayerRole | null) ?? null);
+    });
+  }, [room?.id, room?.status, me?.id]);
+
   const myVote = me ? votes.find((v) => v.voter_player_id === me.id && v.round === room?.current_round) : null;
   const aliveCount = players.filter((p) => p.alive).length;
   const secondsLeft = room?.phase_ends_at ? Math.max(0, Math.floor((new Date(room.phase_ends_at).getTime() - now) / 1000)) : null;
@@ -260,7 +272,7 @@ function RoomPage() {
         {/* RIGHT: sidebar */}
         <aside className="space-y-4">
           {me && room.status !== "lobby" && room.status !== "ended" && (
-            <RoleCard player={me} />
+            <RoleCard role={myRole} />
           )}
 
           {room.status === "lobby" && (
