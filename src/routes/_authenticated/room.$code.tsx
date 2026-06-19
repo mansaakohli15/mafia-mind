@@ -415,12 +415,20 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
   const aliveAI = players.filter((p) => p.is_ai && p.alive).length;
   const humansWin = aliveAI === 0;
   const [heatmap, setHeatmap] = useState<Array<{ observer_player_id: string; target_player_id: string; score: number; round: number }>>([]);
+  const [roles, setRoles] = useState<Record<string, PlayerRole>>({});
   useEffect(() => {
     supabase
       .from("suspicion_scores")
       .select("observer_player_id, target_player_id, score, round")
       .eq("room_id", roomId)
       .then(({ data }) => setHeatmap(data ?? []));
+    supabase.rpc("room_roles_if_ended", { _room_id: roomId }).then(({ data }) => {
+      const map: Record<string, PlayerRole> = {};
+      for (const row of (data ?? []) as Array<{ player_id: string; role: PlayerRole }>) {
+        map[row.player_id] = row.role;
+      }
+      setRoles(map);
+    });
   }, [roomId]);
 
   // Latest score per (observer, target)
@@ -444,7 +452,7 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
           <Badge key={p.id} variant="outline" className="justify-start gap-2 px-3 py-2 font-type text-xs">
             {p.is_ai ? <Bot className="size-3 text-accent" /> : <User className="size-3" />}
             <span className="truncate">{p.display_name}</span>
-            <span className="ml-auto text-[10px] uppercase opacity-60">{p.role}</span>
+            <span className="ml-auto text-[10px] uppercase opacity-60">{roles[p.id] ?? "—"}</span>
           </Badge>
         ))}
       </div>
