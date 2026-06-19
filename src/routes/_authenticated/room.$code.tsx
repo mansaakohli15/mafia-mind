@@ -369,8 +369,7 @@ function PlayerTable({ players, myId, room, votes }: { players: Player[]; myId?:
   );
 }
 
-function RoleCard({ player }: { player: Player }) {
-  const role = player.role;
+function RoleCard({ role }: { role: PlayerRole | null }) {
   const cfg = role === "detective" ? { Icon: Search, label: "Detective", desc: "Find the AI traitor. Survive the vote.", color: "text-primary border-primary/40 bg-primary/10" }
     : role === "accomplice" ? { Icon: ShieldAlert, label: "Accomplice", desc: "Blend in. Mislead. Survive.", color: "text-accent border-accent/40 bg-accent/10" }
     : { Icon: User, label: "Suspect", desc: "Survive. Vote out the traitor.", color: "text-foreground border-border bg-card/60" };
