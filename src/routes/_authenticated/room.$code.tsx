@@ -15,6 +15,7 @@ type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Player = Database["public"]["Tables"]["room_players"]["Row"];
 type Message = Database["public"]["Tables"]["messages"]["Row"];
 type Vote = Database["public"]["Tables"]["votes"]["Row"];
+type PlayerRole = Database["public"]["Enums"]["player_role"];
 
 export const Route = createFileRoute("/_authenticated/room/$code")({
   head: () => ({ meta: [{ title: "Investigation — Mafia Mind" }] }),
@@ -37,6 +38,7 @@ function RoomPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [votes, setVotes] = useState<Vote[]>([]);
+  const [myRole, setMyRole] = useState<PlayerRole | null>(null);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -126,6 +128,16 @@ function RoomPage() {
 
   const me = players.find((p) => p.user_id === userId);
   const isHost = room && userId === room.host_id;
+
+  // Fetch own role securely (other players' roles are not readable until the case ends)
+  useEffect(() => {
+    if (!room || !me) { setMyRole(null); return; }
+    if (room.status === "lobby" || room.status === "ended") { setMyRole(null); return; }
+    supabase.rpc("my_player_role", { _room_id: room.id }).then(({ data }) => {
+      setMyRole((data as PlayerRole | null) ?? null);
+    });
+  }, [room?.id, room?.status, me?.id]);
+
   const myVote = me ? votes.find((v) => v.voter_player_id === me.id && v.round === room?.current_round) : null;
   const aliveCount = players.filter((p) => p.alive).length;
   const secondsLeft = room?.phase_ends_at ? Math.max(0, Math.floor((new Date(room.phase_ends_at).getTime() - now) / 1000)) : null;
@@ -260,7 +272,7 @@ function RoomPage() {
         {/* RIGHT: sidebar */}
         <aside className="space-y-4">
           {me && room.status !== "lobby" && room.status !== "ended" && (
-            <RoleCard player={me} />
+            <RoleCard role={myRole} />
           )}
 
           {room.status === "lobby" && (
@@ -357,8 +369,7 @@ function PlayerTable({ players, myId, room, votes }: { players: Player[]; myId?:
   );
 }
 
-function RoleCard({ player }: { player: Player }) {
-  const role = player.role;
+function RoleCard({ role }: { role: PlayerRole | null }) {
   const cfg = role === "detective" ? { Icon: Search, label: "Detective", desc: "Find the AI traitor. Survive the vote.", color: "text-primary border-primary/40 bg-primary/10" }
     : role === "accomplice" ? { Icon: ShieldAlert, label: "Accomplice", desc: "Blend in. Mislead. Survive.", color: "text-accent border-accent/40 bg-accent/10" }
     : { Icon: User, label: "Suspect", desc: "Survive. Vote out the traitor.", color: "text-foreground border-border bg-card/60" };
@@ -404,12 +415,20 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
   const aliveAI = players.filter((p) => p.is_ai && p.alive).length;
   const humansWin = aliveAI === 0;
   const [heatmap, setHeatmap] = useState<Array<{ observer_player_id: string; target_player_id: string; score: number; round: number }>>([]);
+  const [roles, setRoles] = useState<Record<string, PlayerRole>>({});
   useEffect(() => {
     supabase
       .from("suspicion_scores")
       .select("observer_player_id, target_player_id, score, round")
       .eq("room_id", roomId)
       .then(({ data }) => setHeatmap(data ?? []));
+    supabase.rpc("room_roles_if_ended", { _room_id: roomId }).then(({ data }) => {
+      const map: Record<string, PlayerRole> = {};
+      for (const row of (data ?? []) as Array<{ player_id: string; role: PlayerRole }>) {
+        map[row.player_id] = row.role;
+      }
+      setRoles(map);
+    });
   }, [roomId]);
 
   // Latest score per (observer, target)
@@ -433,7 +452,7 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
           <Badge key={p.id} variant="outline" className="justify-start gap-2 px-3 py-2 font-type text-xs">
             {p.is_ai ? <Bot className="size-3 text-accent" /> : <User className="size-3" />}
             <span className="truncate">{p.display_name}</span>
-            <span className="ml-auto text-[10px] uppercase opacity-60">{p.role}</span>
+            <span className="ml-auto text-[10px] uppercase opacity-60">{roles[p.id] ?? "—"}</span>
           </Badge>
         ))}
       </div>

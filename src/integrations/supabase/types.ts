@@ -280,6 +280,17 @@ export type Database = {
     Functions: {
       is_room_host: { Args: { _room_id: string }; Returns: boolean }
       is_room_member: { Args: { _room_id: string }; Returns: boolean }
+      my_player_role: {
+        Args: { _room_id: string }
+        Returns: Database["public"]["Enums"]["player_role"]
+      }
+      room_roles_if_ended: {
+        Args: { _room_id: string }
+        Returns: {
+          player_id: string
+          role: Database["public"]["Enums"]["player_role"]
+        }[]
+      }
     }
     Enums: {
       player_role: "detective" | "suspect" | "accomplice" | "unassigned"

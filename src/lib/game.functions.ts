@@ -89,7 +89,9 @@ export const startGame = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: room } = await supabase.from("rooms").select("*").eq("id", data.roomId).single();
     if (!room || room.host_id !== userId) throw new Error("Only host can start");
-    const { data: humans } = await supabase.from("room_players").select("*").eq("room_id", data.roomId).order("seat");
+    // Need access to role column for assignment; use admin client (host already verified above)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: humans } = await supabaseAdmin.from("room_players").select("*").eq("room_id", data.roomId).order("seat");
     if (!humans || humans.length < 3) throw new Error("Need at least 3 humans");
 
     // Add AI players
@@ -108,7 +110,7 @@ export const startGame = createServerFn({ method: "POST" })
       };
     });
     void usedSeats;
-    const { data: aiInserted, error: aiErr } = await supabase.from("room_players").insert(aiRows).select();
+    const { data: aiInserted, error: aiErr } = await supabaseAdmin.from("room_players").insert(aiRows).select();
     if (aiErr) throw aiErr;
 
     // Assign roles: 1 detective, 1 accomplice (traitor), rest suspects
@@ -119,7 +121,7 @@ export const startGame = createServerFn({ method: "POST" })
     assignments.push({ id: shuffled[1].id, role: "accomplice" });
     for (let i = 2; i < shuffled.length; i++) assignments.push({ id: shuffled[i].id, role: "suspect" });
     for (const a of assignments) {
-      await supabase.from("room_players").update({ role: a.role }).eq("id", a.id);
+      await supabaseAdmin.from("room_players").update({ role: a.role }).eq("id", a.id);
     }
 
     const phaseEnd = new Date(Date.now() + 120_000).toISOString();
@@ -203,7 +205,8 @@ export const advancePhase = createServerFn({ method: "POST" })
         await supabase.from("room_players").update({ alive: false }).eq("id", eliminated);
       }
       // Check win condition
-      const { data: alive } = await supabase.from("room_players").select("id, is_ai, role").eq("room_id", room.id).eq("alive", true);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: alive } = await supabaseAdmin.from("room_players").select("id, is_ai, role").eq("room_id", room.id).eq("alive", true);
       const aliveAI = alive?.filter((p) => p.is_ai).length ?? 0;
       const totalAlive = alive?.length ?? 0;
       let ended = false;
