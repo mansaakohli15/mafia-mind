@@ -17,7 +17,9 @@ export const triggerAiTurn = createServerFn({ method: "POST" })
     const { data: room } = await supabase.from("rooms").select("*").eq("id", data.roomId).single();
     if (!room || room.status !== "day") return { skipped: true };
 
-    const { data: players } = await supabase.from("room_players").select("*").eq("room_id", data.roomId).order("seat");
+    // Role is column-restricted from authenticated; read full rows via admin
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: players } = await supabaseAdmin.from("room_players").select("*").eq("room_id", data.roomId).order("seat");
     if (!players) return { skipped: true };
 
     const aliveAIs = players.filter((p) => p.is_ai && p.alive);
@@ -64,7 +66,6 @@ CRITICAL RULES:
     });
 
     const clean = text.trim().replace(/^["'`]+|["'`]+$/g, "").slice(0, 280);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("messages").insert({
       room_id: data.roomId,
       player_id: ai.id,
