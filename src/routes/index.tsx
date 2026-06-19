@@ -235,7 +235,10 @@ function Index() {
       <footer className="relative z-10 border-t border-border/40 px-6 sm:px-12 py-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 font-type text-[10px] tracking-[0.25em] uppercase text-muted-foreground/60">
           <div>Mafia Mind · Case File © {new Date().getFullYear()}</div>
-          <div>All Suspects Are Innocent Until Voted Out</div>
+          <div className="flex items-center gap-6">
+            <Link to="/trust" className="hover:text-primary">Trust &amp; Privacy</Link>
+            <span>All Suspects Are Innocent Until Voted Out</span>
+          </div>
         </div>
       </footer>
     </div>
