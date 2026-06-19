@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign In — DeceptionAI" }] }),
+  head: () => ({ meta: [{ title: "Sign In — Mafia Mind" }] }),
   component: AuthPage,
 });
 
@@ -75,7 +75,7 @@ function AuthPage() {
 
       <div className="w-full max-w-md relative">
         <Link to="/" className="flex items-center gap-2 mb-8 text-muted-foreground hover:text-primary transition-colors font-type text-xs tracking-widest uppercase">
-          <Eye className="size-4" /> DeceptionAI
+          <Eye className="size-4" /> Mafia Mind
         </Link>
 
         <div className="bg-card/70 backdrop-blur-md border border-border rounded-sm p-8 shadow-2xl">

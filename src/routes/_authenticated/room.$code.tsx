@@ -17,7 +17,7 @@ type Message = Database["public"]["Tables"]["messages"]["Row"];
 type Vote = Database["public"]["Tables"]["votes"]["Row"];
 
 export const Route = createFileRoute("/_authenticated/room/$code")({
-  head: () => ({ meta: [{ title: "Investigation — DeceptionAI" }] }),
+  head: () => ({ meta: [{ title: "Investigation — Mafia Mind" }] }),
   component: RoomPage,
 });
 
@@ -189,7 +189,7 @@ function RoomPage() {
       <header className="flex items-center justify-between px-4 sm:px-8 py-4 border-b border-border/40">
         <Link to="/lobby" className="flex items-center gap-2">
           <Eye className="size-5 text-primary" />
-          <span className="font-display text-lg">Deception<span className="italic text-primary">AI</span></span>
+          <span className="font-display text-lg">Mafia<span className="italic text-primary">Mind</span></span>
         </Link>
         <div className="flex items-center gap-3">
           <button onClick={copyCode} className="font-type tracking-[0.3em] text-xs uppercase text-muted-foreground hover:text-primary flex items-center gap-2">
