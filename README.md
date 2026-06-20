@@ -91,7 +91,7 @@ npm run dev
 npm run build
 ```
 
-You'll need a Supabase project (Postgres + Realtime enabled) and a Gemini API key (via the Lovable AI Gateway or directly) configured as environment variables — see `.env.example`.
+You'll need a Supabase project (Postgres + Realtime enabled) and a Gemini API key  configured as environment variables .
 
 ---
 
