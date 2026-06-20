@@ -12,15 +12,14 @@
 
 <img width="1896" height="1020" alt="image" src="https://github.com/user-attachments/assets/8d114c07-ebbd-4ec7-8ee7-6d4017858a43" />
 
-<img width="1918" height="1012" alt="image" src="https://github.com/user-attachments/assets/178658f2-f727-417b-babd-c912d5cf51a5" />
-
-<img width="1915" height="1001" alt="image" src="https://github.com/user-attachments/assets/bf40850a-6f96-4e27-995b-fb49e5f72957" />
-
 ---
 
 ## Overview
 
 Up to eight players join a six-character room code. The host seats one or two AI agents alongside the humans. Roles — **Detective**, **Accomplice**, **Suspects** — are dealt secretly, and the hunt begins.
+
+
+<img width="1918" height="1012" alt="image" src="https://github.com/user-attachments/assets/178658f2-f727-417b-babd-c912d5cf51a5" />
 
 Each round runs in two phases:
 
@@ -41,6 +40,8 @@ On every turn, the model produces two structured outputs:
 2. A typed JSON array of **0–100 suspicion scores**, with written reasoning, for every other living player
 
 Those scores are persisted to Postgres and drive the AI's autonomous voting each round — nothing is scripted after the fact.
+
+<img width="1915" height="1001" alt="image" src="https://github.com/user-attachments/assets/bf40850a-6f96-4e27-995b-fb49e5f72957" />
 
 ---
 
