@@ -16,7 +16,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -32,7 +32,14 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/reset-password",
+        });
+        if (error) throw error;
+        toast.success("Recovery link sent. Check your inbox, detective.");
+        setMode("signin");
+      } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -81,9 +88,14 @@ function AuthPage() {
         <div className="bg-card/70 backdrop-blur-md border border-border rounded-sm p-8 shadow-2xl">
           <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">Case File · Access</div>
           <h1 className="font-display text-3xl mb-6">
-            {mode === "signin" ? "Sign in to investigate" : "Open a new case file"}
+            {mode === "signin"
+              ? "Sign in to investigate"
+              : mode === "signup"
+                ? "Open a new case file"
+                : "Recover your case file"}
           </h1>
 
+          {mode !== "forgot" && (
           <Button
             type="button"
             variant="outline"
@@ -93,12 +105,15 @@ function AuthPage() {
           >
             Continue with Google
           </Button>
+          )}
 
+          {mode !== "forgot" && (
           <div className="flex items-center gap-3 mb-4">
             <div className="h-px bg-border flex-1" />
             <span className="font-type text-[10px] tracking-widest uppercase text-muted-foreground">or</span>
             <div className="h-px bg-border flex-1" />
           </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
@@ -111,22 +126,48 @@ function AuthPage() {
               <Label htmlFor="email" className="font-type text-[10px] tracking-widest uppercase text-muted-foreground">Email</Label>
               <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 bg-background/60" />
             </div>
+            {mode !== "forgot" && (
             <div>
               <Label htmlFor="password" className="font-type text-[10px] tracking-widest uppercase text-muted-foreground">Password</Label>
               <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 bg-background/60" />
             </div>
+            )}
+
+            {mode === "signin" && (
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="block w-full text-right text-[10px] font-type tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors"
+              >
+                Forgot password?
+              </button>
+            )}
 
             <Button type="submit" disabled={loading} className="w-full h-11 font-type tracking-widest text-xs uppercase bg-primary text-primary-foreground hover:bg-primary/90">
-              {loading ? <Loader2 className="size-4 animate-spin" /> : mode === "signin" ? "Sign In" : "Create Account"}
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : mode === "signin" ? (
+                "Sign In"
+              ) : mode === "signup" ? (
+                "Create Account"
+              ) : (
+                "Send Recovery Link"
+              )}
             </Button>
           </form>
 
           <button
             type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+            onClick={() =>
+              setMode(mode === "signin" ? "signup" : "signin")
+            }
             className="mt-6 w-full text-center text-xs font-type tracking-wider text-muted-foreground hover:text-primary transition-colors"
           >
-            {mode === "signin" ? "No file yet? Open a new case." : "Already on the force? Sign in."}
+            {mode === "signin"
+              ? "No file yet? Open a new case."
+              : mode === "signup"
+                ? "Already on the force? Sign in."
+                : "Back to sign in."}
           </button>
         </div>
       </div>
