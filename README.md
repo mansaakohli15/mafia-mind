@@ -10,6 +10,12 @@
 
 **[🎮 Play now → mafia-mind.vercel.app](https://mafia-mind.vercel.app/)**
 
+<img width="1896" height="1020" alt="image" src="https://github.com/user-attachments/assets/8d114c07-ebbd-4ec7-8ee7-6d4017858a43" />
+
+<img width="1918" height="1012" alt="image" src="https://github.com/user-attachments/assets/178658f2-f727-417b-babd-c912d5cf51a5" />
+
+<img width="1915" height="1001" alt="image" src="https://github.com/user-attachments/assets/bf40850a-6f96-4e27-995b-fb49e5f72957" />
+
 ---
 
 ## Overview
@@ -47,6 +53,10 @@ Those scores are persisted to Postgres and drive the AI's autonomous voting each
 - 📊 Suspicion scoring engine with per-round written explanations
 - 🔥 Post-game Suspicion Heatmap visualization
 - 🔒 Row-level security — players only ever see their own role and their own room's data; other roles unlock once the game ends, enforced by database triggers (no client-side trust)
+<img width="443" height="970" alt="image" src="https://github.com/user-attachments/assets/a51a4c8a-e53f-4263-8657-30d71882043b" />
+
+<img width="447" height="972" alt="image" src="https://github.com/user-attachments/assets/74e0dd3f-823e-403e-8440-bdac95f8c53c" />
+
 
 ---
 
