@@ -56,7 +56,12 @@ function AuthPage() {
         navigate({ to: "/lobby" });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      const msg = err instanceof Error ? err.message : "Authentication failed";
+      if (msg.toLowerCase().includes("failed to fetch")) {
+        toast.error("Could not connect to Supabase. Please verify your SUPABASE_URL in .env");
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
