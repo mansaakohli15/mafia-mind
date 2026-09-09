@@ -56,9 +56,14 @@ function AuthPage() {
         navigate({ to: "/lobby" });
       }
     } catch (err) {
+      console.error("Authentication error:", err);
       const msg = err instanceof Error ? err.message : "Authentication failed";
       if (msg.toLowerCase().includes("failed to fetch")) {
-        toast.error("Could not connect to Supabase. Please verify your SUPABASE_URL in .env");
+        const targetUrl =
+          import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "unknown";
+        toast.error(
+          `Network error: Could not reach Supabase at ${targetUrl}. Check internet connectivity or CORS settings.`,
+        );
       } else {
         toast.error(msg);
       }
