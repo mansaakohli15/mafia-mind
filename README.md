@@ -1,123 +1,181 @@
 # 🕵️ Mafia Mind
 
-**A real-time multiplayer social-deduction game where humans hunt an LLM hiding among them.**
+<p align="center">
+  <strong>A real-time multiplayer social-deduction game where humans hunt an LLM hiding in plain sight.</strong>
+</p>
 
-[![Live Demo](https://img.shields.io/badge/demo-mafia--mind.vercel.app-brightgreen)](https://mafia-mind.vercel.app/)
-![TanStack Start](https://img.shields.io/badge/TanStack%20Start-v1-FF4154)
-![React](https://img.shields.io/badge/React-19-61DAFB)
-![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Realtime-3ECF8E)
-![Gemini](https://img.shields.io/badge/AI-Gemini%203-4285F4)
+<p align="center">
+  <a href="https://mafia-mind.vercel.app/"><img src="https://img.shields.io/badge/demo-mafia--mind.vercel.app-brightgreen?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
+  <img src="https://img.shields.io/badge/TanStack%20Start-v1-FF4154?style=for-the-badge&logo=react" alt="TanStack Start" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/Supabase-Postgres%20%2B%20Realtime-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" />
+  <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?style=for-the-badge&logo=google" alt="Google Gemini" />
+</p>
 
-**[🎮 Play now → mafia-mind.vercel.app](https://mafia-mind.vercel.app/)**
+<p align="center">
+  <strong><a href="https://mafia-mind.vercel.app/">🎮 Play Now → mafia-mind.vercel.app</a></strong>
+</p>
 
-<img width="1896" height="1020" alt="image" src="https://github.com/user-attachments/assets/8d114c07-ebbd-4ec7-8ee7-6d4017858a43" />
-
----
-
-## Overview
-
-Up to eight players join a six-character room code. The host seats one or two AI agents alongside the humans. Roles — **Detective**, **Accomplice**, **Suspects** — are dealt secretly, and the hunt begins.
-
-
-<img width="1918" height="1012" alt="image" src="https://github.com/user-attachments/assets/178658f2-f727-417b-babd-c912d5cf51a5" />
-
-Each round runs in two phases:
-
-- 🗣️ **Day Phase (120s)** — everyone chats in a shared room, human and AI alike
-- 🗳️ **Vote Phase (45s)** — players vote to eliminate a suspect
-
-The game ends when the AI is lynched (**humans win**) or the AI reaches numerical parity with the remaining humans (**AI wins**). At the end, every role is revealed — and so is the **Suspicion Heatmap**: every score the AI gave every player, every round, with its reasoning laid bare.
+<p align="center">
+  <img width="1896" height="1020" alt="Mafia Mind Landing Screen" src="https://github.com/user-attachments/assets/8d114c07-ebbd-4ec7-8ee7-6d4017858a43" />
+</p>
 
 ---
 
-## How the AI plays
+## 📖 Overview
 
-Each AI seat is powered by **Google Gemini**, conditioned on one of **ten distinct personas** — think "tired ex-cop" or "sarcastic art-school kid." Personas aren't just flavor text; they shape how the model talks, deflects, and accuses.
+**Mafia Mind** blends classic social-deduction mechanics (Mafia / Werewolf / Among Us) with modern AI agent reasoning. Up to eight players join a private room using a 6-character code. The host seats one or two autonomous AI agents alongside human investigators.
 
-On every turn, the model produces two structured outputs:
+Roles — **Detective**, **Accomplice**, and **Suspects** — are dealt in secret. The hunt begins immediately.
 
-1. A short, in-character chat message
-2. A typed JSON array of **0–100 suspicion scores**, with written reasoning, for every other living player
-
-Those scores are persisted to Postgres and drive the AI's autonomous voting each round — nothing is scripted after the fact.
-
-<img width="1915" height="1001" alt="image" src="https://github.com/user-attachments/assets/bf40850a-6f96-4e27-995b-fb49e5f72957" />
+<p align="center">
+  <img width="1918" height="1012" alt="Mafia Mind Investigation Room" src="https://github.com/user-attachments/assets/178658f2-f727-417b-babd-c912d5cf51a5" />
+</p>
 
 ---
 
-## Features
+## ⏱️ Gameplay Phases
 
-- ⏱️ Real-time multiplayer gameplay via Supabase Realtime
-- 🎭 Hidden roles and elimination mechanics
-- 🤖 AI-powered players with distinct, persistent personas
-- 🧠 Autonomous AI reasoning and voting
-- 📊 Suspicion scoring engine with per-round written explanations
-- 🔥 Post-game Suspicion Heatmap visualization
-- 🔒 Row-level security — players only ever see their own role and their own room's data; other roles unlock once the game ends, enforced by database triggers (no client-side trust)
-<img width="443" height="970" alt="image" src="https://github.com/user-attachments/assets/a51a4c8a-e53f-4263-8657-30d71882043b" />
+Each round flows continuously through two dynamic phases:
 
-<img width="447" height="972" alt="image" src="https://github.com/user-attachments/assets/74e0dd3f-823e-403e-8440-bdac95f8c53c" />
+| Phase             | Duration        | Objective                                                                                                                                             |
+| ----------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🗣️ **Day Phase**  | **120 seconds** | Everyone discusses in a shared room. Humans and AI agents talk, question, accuse, and defend. AI agents analyze conversational patterns in real-time. |
+| 🗳️ **Vote Phase** | **45 seconds**  | Players cast their votes to eliminate a suspect. AI players autonomously evaluate suspicion metrics and cast their own votes.                         |
 
+### 🏆 Win Conditions
 
----
-
-## Tech stack
-
-| Layer          | Technology                                                |
-| -------------- | --------------------------------------------------------- |
-| Frontend       | React 19, TanStack Start v1 (SSR, typed server functions) |
-| Language       | TypeScript                                                |
-| Styling        | Tailwind CSS v4 — custom noir-detective theme             |
-| Build tool     | Vite 8                                                    |
-| Backend / DB   | Supabase (Postgres, Realtime, Auth)                       |
-| Access control | Postgres Row-Level Security + triggers                    |
-| AI             | Google Gemini API (via `@ai-sdk/google`)                  |
-| Hosting        | Vercel (Nitro server functions)                           |
+- **Humans Win**: Eliminate all hidden AI agents before they take over.
+- **AI Wins**: The AI reaches numerical parity with the remaining human players.
+- **Post-Game Reveal**: Every player's true identity is revealed along with the interactive **Suspicion Heatmap** showing the AI's internal reasoning round by round!
 
 ---
 
-## Gameplay flow
+## 🧠 How the AI Plays
 
-1. **Create or join** a room using a six-character code
-2. **Roles are assigned** secretly — Detective, Accomplice, Suspects
-3. **Day Phase** — players (and AI agents) discuss for 120 seconds
-4. AI agents **analyze the conversation** and generate suspicion scores with reasoning
-5. **Vote Phase** — everyone votes to eliminate a suspect, 45 seconds on the clock
-6. The game checks win conditions
-7. Repeat until **humans eliminate the AI**, or the **AI reaches parity**
-8. **End screen**: every role revealed, full Suspicion Heatmap rendered
+Each AI player is powered by **Google Gemini** using distinct behavioral personas. The AI doesn't just generate canned responses — it parses live chat context, assesses player behavior, and generates structured outputs on every turn:
+
+1. **In-Character Dialogue**: Natural, casual, persona-driven chat responses to deflect suspicion and blend in.
+2. **Dynamic Suspicion Engine**: A structured output containing typed **0–100 suspicion scores** and written justifications for every other living player.
+3. **Autonomous Voting**: Real-time Postgres records of AI suspicion scores determine who the AI targets during the voting phase.
+
+<p align="center">
+  <img width="1915" height="1001" alt="Mafia Mind AI Suspicion Reasoning" src="https://github.com/user-attachments/assets/bf40850a-6f96-4e27-995b-fb49e5f72957" />
+</p>
+
+### 🎭 AI Persona Roster
+
+- **Marlowe** — Tired but sharp ex-cop, dry humor, short sentences.
+- **Veda** — Polite analyst, asks clarifying questions, careful with claims.
+- **Rook** — Blue-collar mechanic, blunt, suspicious of fancy talk.
+- **Lila** — Warm bartender, defuses arguments, remembers small details.
+- **Quentin** — Anxious accountant, over-explains, talks fast.
+- **Sable** — Cynical journalist, asks pointed questions, never commits early.
+- **Theo** — Quiet librarian, soft-spoken, drops surprising facts.
+- **Nyx** — Sarcastic art-school kid, dismissive but observant.
+- **Hux** — Retired colonel, formal, demands evidence before accusing.
+- **Mira** — Calm nurse under pressure, watches for subtle tells.
 
 ---
 
-## Local development
+## ✨ Features
+
+- ⚡ **Real-Time Multiplayer**: Synchronized gameplay and instant messaging via Supabase Realtime channels.
+- 🎭 **Secret Role Assignment**: Complete hidden identity system with server-validated game rules.
+- 🤖 **Autonomous AI Infiltration**: AI players conditioned on custom personas that mimic human chat timing and conversational nuances.
+- 📊 **Structured Reasoning Engine**: Round-by-round AI suspicion ratings with verifiable explanations.
+- 🔥 **Post-Game Suspicion Heatmap**: Complete post-match analysis visualizing how the AI perceived every player over time.
+- 🔒 **Zero-Trust Access Control**: Postgres Row-Level Security (RLS) ensures role secrecy until the game concludes.
+
+<p align="center">
+  <img width="443" height="970" alt="Mafia Mind Mobile View 1" src="https://github.com/user-attachments/assets/a51a4c8a-e53f-4263-8657-30d71882043b" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img width="447" height="972" alt="Mafia Mind Mobile View 2" src="https://github.com/user-attachments/assets/74e0dd3f-823e-403e-8440-bdac95f8c53c" />
+</p>
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer                  | Technology                           | Description                                              |
+| ---------------------- | ------------------------------------ | -------------------------------------------------------- |
+| **Frontend**           | React 19 & TanStack Start            | Server-Side Rendering (SSR) and typed server functions   |
+| **Language**           | TypeScript                           | Strict type safety across client and server              |
+| **Styling**            | Tailwind CSS v4                      | Custom noir-detective aesthetic with responsive UI       |
+| **Build & Tooling**    | Vite 8                               | Ultra-fast HMR and optimized builds                      |
+| **Backend & Database** | Supabase                             | Postgres DB, Realtime WebSockets, and Authentication     |
+| **Security**           | Postgres RLS                         | Row-Level Security policies enforcing hidden role states |
+| **AI Engine**          | Google Gemini API (`@ai-sdk/google`) | Structured text & JSON object generation for AI turns    |
+| **Deployment**         | Vercel                               | Serverless Nitro preset for full-stack deployment        |
+
+---
+
+## 🚀 Local Development Setup
+
+### 1. Clone the repository
 
 ```bash
-# install dependencies
+git clone https://github.com/mansaakohli15/mafia-mind.git
+cd mafia-mind
+```
+
+### 2. Install dependencies
+
+```bash
 npm install
+```
 
-# start the dev server
+### 3. Configure environment variables
+
+Create a `.env` file in the root directory (refer to `.env.example`):
+
+```env
+# Supabase Configuration
+SUPABASE_PROJECT_ID=your-project-id
+SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# Client-accessible Supabase variables
+VITE_SUPABASE_PROJECT_ID=your-project-id
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+
+# Google Gemini API
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+### 4. Run database migrations
+
+Execute the SQL files inside `supabase/migrations/` in your Supabase SQL editor to create the required tables, triggers, and RLS policies.
+
+### 5. Start development server
+
+```bash
 npm run dev
+```
 
-# build for production
+### 6. Build for production
+
+```bash
 npm run build
 ```
 
-You'll need a Supabase project (Postgres + Realtime enabled) and a Gemini API key configured as environment variables .
+---
+
+## 🗺️ Roadmap
+
+- [ ] Spectator mode for eliminated players and observers
+- [ ] Player career stats & deduction accuracy tracking
+- [ ] Custom room settings (timer lengths, role distribution, AI counts)
+- [ ] Voice transcription / audio clues mode
+- [ ] Additional noir and cyber-detective AI personas
 
 ---
 
-## Roadmap
+## 💡 Why Mafia Mind?
 
-- [ ] Spectator mode
-- [ ] Player statistics dashboard
-- [ ] Additional AI personas
-- [ ] Custom room settings (player count, timer length, role mix)
-- [ ] Enhanced moderation tools
-
----
-
-## Why I built this
-
-Mafia Mind started as an experiment in **autonomous reasoning, structured LLM outputs, and human-AI social interaction** — what happens when an LLM has to bluff, deflect, and build a believable identity under real social pressure, in real time, against people actively trying to catch it out?
+Mafia Mind was built to explore the boundaries of **autonomous reasoning, structured LLM outputs, and human-AI social dynamics** — answering the question: _Can an LLM effectively bluff, blend in, and survive under intense social pressure when human detectives are actively trying to expose it?_
 
 Happy hunting, detective. 🕵️
