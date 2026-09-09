@@ -1,11 +1,25 @@
+/**
+ * AI Server Functions Module
+ *
+ * Implements autonomous AI player behaviors for Mafia Mind:
+ * 1. triggerAiTurn: Generates conversational responses and calculates live suspicion scores
+ *    using Google Gemini models.
+ * 2. aiVote: Autonomously casts votes based on aggregated suspicion ratings during the voting phase.
+ */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText, generateObject } from "ai";
 import { getGoogleProvider } from "./gemini.server";
 
+// Default to Gemini 2.5 Flash for low latency and high quality social deduction reasoning
 const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
+/**
+ * Server function to trigger an AI player's chat message and suspicion assessment.
+ * Evaluates the current game transcript, applies persona instructions, and writes
+ * the generated message and suspicion matrix to Postgres.
+ */
 export const triggerAiTurn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ roomId: z.string().uuid() }).parse(d))
@@ -123,6 +137,11 @@ CRITICAL RULES:
     return { ok: true };
   });
 
+/**
+ * Server function to trigger autonomous AI voting during the voting phase.
+ * Evaluates the AI's recorded suspicion scores for this round and votes to eliminate
+ * the player with the highest suspicion score.
+ */
 export const aiVote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ roomId: z.string().uuid() }).parse(d))

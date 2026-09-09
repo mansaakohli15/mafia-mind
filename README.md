@@ -110,6 +110,106 @@ Each AI player is powered by **Google Gemini** using distinct behavioral persona
 
 ---
 
+## 🏗️ System Architecture
+
+Mafia Mind is built on a modern full-stack reactive architecture that bridges real-time client state with server-authoritative game progression and autonomous LLM reasoning.
+
+```mermaid
+flowchart TD
+    subgraph Client["🖥️ Client Layer (Browser)"]
+        UI["React 19 UI (TanStack Router)"]
+        RT_Sub["Supabase Realtime Subscriptions"]
+        Auth_State["Client Auth & Session Store"]
+    end
+
+    subgraph Server["⚡ Server Layer (TanStack Start & Nitro)"]
+        RPC["Typed Server Functions"]
+        Auth_MW["Supabase Auth Middleware"]
+        Admin_Client["Supabase Admin Client (Service Role)"]
+        Gemini_Bridge["Gemini AI Bridge (@ai-sdk/google)"]
+    end
+
+    subgraph DB["🗄️ Database & Realtime (Supabase)"]
+        Postgres[("Postgres Database")]
+        RLS["Row-Level Security Policies"]
+        Realtime_WS["Realtime Broadcast & Change Engine"]
+    end
+
+    subgraph AI["🤖 AI Layer (Google AI Studio)"]
+        Gemini["Google Gemini 2.5 Flash"]
+    end
+
+    %% Client Interactions
+    UI -->|1. User Actions & Chat| RPC
+    UI -->|2. RLS-Scoped Queries| Postgres
+    RT_Sub <-->|3. Live Room & Chat Events| Realtime_WS
+
+    %% Server Interactions
+    RPC --> Auth_MW
+    Auth_MW --> Admin_Client
+    Admin_Client -->|Bypass RLS for Secret Roles| Postgres
+    Admin_Client --> Gemini_Bridge
+    Gemini_Bridge <-->|Structured Prompts & JSON Schema| Gemini
+    Gemini_Bridge -->|Persist AI Messages & Suspicion Scores| Postgres
+
+    %% Database Sync
+    Postgres --> RLS
+    Postgres --> Realtime_WS
+```
+
+### 🔄 Game Lifecycle State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Lobby: Create or Join Room (6-Char Code)
+    Lobby --> RoleDealing: Host starts game (Min 3 humans + AI)
+
+    state RoleDealing {
+        [*] --> SeatAI: Seat 1-2 AI Personas
+        SeatAI --> SecretAssignment: Deal Detective, Accomplice, Suspects
+        SecretAssignment --> [*]
+    }
+
+    RoleDealing --> DayPhase: Round 1 Starts (120s Timer)
+
+    state DayPhase {
+        [*] --> HumanChat: Players discuss in realtime
+        HumanChat --> AITurnTrigger: Periodic conversation analysis
+        AITurnTrigger --> GenerateDialogue: Gemini persona response
+        GenerateDialogue --> CalculateSuspicion: 0-100 structured score per player
+        CalculateSuspicion --> SaveScores: Persist matrix to Postgres
+    }
+
+    DayPhase --> VotePhase: Phase Timer Expires (45s Timer)
+
+    state VotePhase {
+        [*] --> PlayerVotes: Humans vote to eliminate
+        [*] --> AIVotes: AI votes for highest suspicion target
+        PlayerVotes --> TallyVotes: Aggregate votes
+        AIVotes --> TallyVotes
+        TallyVotes --> EliminatePlayer: Mark player as deceased
+    }
+
+    VotePhase --> WinCheck: Check living rosters
+
+    state WinCheck <<choice>>
+    WinCheck --> HumansWin: All AI eliminated
+    WinCheck --> AIWins: AI reaches numerical parity
+    WinCheck --> DayPhase: Next round begins (Round + 1)
+
+    HumansWin --> PostGame: Reveal all roles & Heatmap
+    AIWins --> PostGame: Reveal all roles & Heatmap
+    PostGame --> [*]
+```
+
+### 🔒 Zero-Trust Security & Data Isolation
+
+- **Role Concealment via RLS**: During active gameplay, database-level security policies restrict role visibility so clients cannot view other players' hidden roles, even by inspecting network payloads.
+- **Server-Authoritative State**: Role assignments, win condition evaluations, vote tallies, and phase transitions execute exclusively through validated server functions.
+- **End-Game Revelation Trigger**: When a room's status transitions to `ended`, database triggers unlock role columns for all verified room participants, populating the full post-game Suspicion Heatmap.
+
+---
+
 ## 🚀 Local Development Setup
 
 ### 1. Clone the repository

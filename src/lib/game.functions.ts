@@ -1,7 +1,23 @@
+/**
+ * Game Core Server Functions Module
+ *
+ * Implements the server-authoritative game state lifecycle for Mafia Mind:
+ * - createRoom: Generates unique 6-character room codes and initializes the lobby.
+ * - joinRoom: Enforces room capacity and seat assignments.
+ * - leaveRoom: Removes players from active lobbies.
+ * - startGame: Seats AI agents, secretly assigns roles (Detective, Accomplice, Suspects),
+ *              and begins Day 1.
+ * - sendMessage: Server-validated in-game player chat.
+ * - castVote: Records player elimination votes per round.
+ * - advancePhase: Handles round transitions, vote tallying, player elimination, and win condition checks.
+ */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+/**
+ * Roster of 10 distinct AI agent personas with unique communicative styles
+ */
 const AI_PERSONAS = [
   { name: "Marlowe", persona: "tired but sharp ex-cop, dry humor, short sentences" },
   {
@@ -18,6 +34,9 @@ const AI_PERSONAS = [
   { name: "Mira", persona: "nurse, calm under pressure, watches for tells" },
 ];
 
+/**
+ * Generates an unambiguous 6-character uppercase alphanumeric room code.
+ */
 function genCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
@@ -25,6 +44,9 @@ function genCode() {
   return s;
 }
 
+/**
+ * Creates a new game room lobby and seats the host.
+ */
 export const createRoom = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
