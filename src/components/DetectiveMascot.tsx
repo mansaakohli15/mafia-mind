@@ -86,12 +86,12 @@ export function DetectiveMascot({ className = "" }: { className?: string }) {
         <ellipse cx="100" cy="120" rx="95" ry="115" fill="url(#cheek-glow)" />
 
         {/* coat / shoulders */}
-        <path
-          d="M 30 230 Q 30 170 70 160 L 130 160 Q 170 170 170 230 Z"
-          fill="url(#coat-grad)"
-        />
+        <path d="M 30 230 Q 30 170 70 160 L 130 160 Q 170 170 170 230 Z" fill="url(#coat-grad)" />
         {/* collar */}
-        <path d="M 80 160 L 100 185 L 120 160 L 115 175 L 100 200 L 85 175 Z" fill="oklch(0.10 0.01 40)" />
+        <path
+          d="M 80 160 L 100 185 L 120 160 L 115 175 L 100 200 L 85 175 Z"
+          fill="oklch(0.10 0.01 40)"
+        />
         {/* tie */}
         <path d="M 96 185 L 104 185 L 108 215 L 100 230 L 92 215 Z" fill="oklch(0.50 0.20 27)" />
 
@@ -128,8 +128,18 @@ export function DetectiveMascot({ className = "" }: { className?: string }) {
         </g>
 
         {/* brow — adds suspicion */}
-        <path d="M 64 96 L 92 100" stroke="oklch(0.10 0.01 40)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M 108 100 L 136 96" stroke="oklch(0.10 0.01 40)" strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M 64 96 L 92 100"
+          stroke="oklch(0.10 0.01 40)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 108 100 L 136 96"
+          stroke="oklch(0.10 0.01 40)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
 
         {/* nose hint */}
         <path d="M 100 118 Q 96 130 100 138 Q 104 130 100 118" fill="oklch(0.45 0.06 50 / 0.5)" />

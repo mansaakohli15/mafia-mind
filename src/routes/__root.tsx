@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,10 +36,9 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error("Application error:", error);
   }, [error]);
 
   return (
@@ -80,10 +78,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Mafia Mind — Spot the AI Among Us" },
-      { name: "description", content: "A real-time social deduction game where one secret player is an AI agent. Lie, accuse, and survive — or be exposed." },
+      {
+        name: "description",
+        content:
+          "A real-time social deduction game where one secret player is an AI agent. Lie, accuse, and survive — or be exposed.",
+      },
       { name: "author", content: "Mafia Mind" },
       { property: "og:title", content: "Mafia Mind — Spot the AI Among Us" },
-      { property: "og:description", content: "A real-time social deduction game where one secret player is an AI agent." },
+      {
+        property: "og:description",
+        content: "A real-time social deduction game where one secret player is an AI agent.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

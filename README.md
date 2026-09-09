@@ -32,7 +32,7 @@ The game ends when the AI is lynched (**humans win**) or the AI reaches numerica
 
 ## How the AI plays
 
-Each AI seat is powered by **Google Gemini 3** via the Lovable AI Gateway, conditioned on one of **ten distinct personas** — think "tired ex-cop" or "sarcastic art-school kid." Personas aren't just flavor text; they shape how the model talks, deflects, and accuses.
+Each AI seat is powered by **Google Gemini**, conditioned on one of **ten distinct personas** — think "tired ex-cop" or "sarcastic art-school kid." Personas aren't just flavor text; they shape how the model talks, deflects, and accuses.
 
 On every turn, the model produces two structured outputs:
 
@@ -63,16 +63,16 @@ Those scores are persisted to Postgres and drive the AI's autonomous voting each
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, TanStack Start v1 (SSR, typed server functions) |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 — custom noir-detective theme |
-| Build tool | Vite 7 |
-| Backend / DB | Supabase (Postgres, Realtime, Auth) |
-| Access control | Postgres Row-Level Security + triggers |
-| AI | Google Gemini 3, via the Lovable AI Gateway |
-| Hosting | Vercel (Nitro server functions) |
+| Layer          | Technology                                                |
+| -------------- | --------------------------------------------------------- |
+| Frontend       | React 19, TanStack Start v1 (SSR, typed server functions) |
+| Language       | TypeScript                                                |
+| Styling        | Tailwind CSS v4 — custom noir-detective theme             |
+| Build tool     | Vite 8                                                    |
+| Backend / DB   | Supabase (Postgres, Realtime, Auth)                       |
+| Access control | Postgres Row-Level Security + triggers                    |
+| AI             | Google Gemini API (via `@ai-sdk/google`)                  |
+| Hosting        | Vercel (Nitro server functions)                           |
 
 ---
 
@@ -102,7 +102,7 @@ npm run dev
 npm run build
 ```
 
-You'll need a Supabase project (Postgres + Realtime enabled) and a Gemini API key  configured as environment variables .
+You'll need a Supabase project (Postgres + Realtime enabled) and a Gemini API key configured as environment variables .
 
 ---
 

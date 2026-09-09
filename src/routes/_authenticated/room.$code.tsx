@@ -7,7 +7,20 @@ import { triggerAiTurn, aiVote } from "@/lib/ai.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Send, Loader2, Crown, Bot, Skull, ShieldAlert, Search, User, LogOut, Copy, Check } from "lucide-react";
+import {
+  Eye,
+  Send,
+  Loader2,
+  Crown,
+  Bot,
+  Skull,
+  ShieldAlert,
+  Search,
+  User,
+  LogOut,
+  Copy,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -58,8 +71,16 @@ function RoomPage() {
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
     (async () => {
-      const { data: r } = await supabase.from("rooms").select("*").eq("code", code.toUpperCase()).maybeSingle();
-      if (!r) { toast.error("Room not found"); navigate({ to: "/lobby" }); return; }
+      const { data: r } = await supabase
+        .from("rooms")
+        .select("*")
+        .eq("code", code.toUpperCase())
+        .maybeSingle();
+      if (!r) {
+        toast.error("Room not found");
+        navigate({ to: "/lobby" });
+        return;
+      }
       if (cancelled) return;
       roomId = r.id;
       setRoom(r);
@@ -73,24 +94,47 @@ function RoomPage() {
       setMessages(m ?? []);
       setVotes(v ?? []);
 
-      channel = supabase.channel(`room:${r.id}:${Math.random().toString(36).slice(2, 8)}`)
-        .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: `id=eq.${r.id}` },
-          (payload) => { if (payload.new) setRoom(payload.new as Room); })
-        .on("postgres_changes", { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${r.id}` },
+      channel = supabase
+        .channel(`room:${r.id}:${Math.random().toString(36).slice(2, 8)}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "rooms", filter: `id=eq.${r.id}` },
+          (payload) => {
+            if (payload.new) setRoom(payload.new as Room);
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${r.id}` },
           async () => {
-            const { data } = await supabase.from("room_players").select("*").eq("room_id", r.id).order("seat");
+            const { data } = await supabase
+              .from("room_players")
+              .select("*")
+              .eq("room_id", r.id)
+              .order("seat");
             setPlayers(data ?? []);
-          })
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `room_id=eq.${r.id}` },
-          (payload) => setMessages((prev) => [...prev, payload.new as Message]))
-        .on("postgres_changes", { event: "*", schema: "public", table: "votes", filter: `room_id=eq.${r.id}` },
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `room_id=eq.${r.id}` },
+          (payload) => setMessages((prev) => [...prev, payload.new as Message]),
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "votes", filter: `room_id=eq.${r.id}` },
           async () => {
             const { data } = await supabase.from("votes").select("*").eq("room_id", r.id);
             setVotes(data ?? []);
-          })
+          },
+        )
         .subscribe();
     })();
-    return () => { cancelled = true; if (channel) supabase.removeChannel(channel); void roomId; };
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+      void roomId;
+    };
   }, [code, navigate]);
 
   // Timer tick
@@ -112,7 +156,12 @@ function RoomPage() {
     const lastPlayer = players.find((p) => p.id === last.player_id);
     if (!lastPlayer || lastPlayer.is_ai) return;
     lastAiTrigger.current = last.id;
-    setTimeout(() => { aiTurn({ data: { roomId: room.id } }).catch(() => {}); }, 1200 + Math.random() * 1800);
+    setTimeout(
+      () => {
+        aiTurn({ data: { roomId: room.id } }).catch(() => {});
+      },
+      1200 + Math.random() * 1800,
+    );
   }, [messages, room, players, aiTurn]);
 
   // When entering voting phase, trigger AI votes once
@@ -120,9 +169,15 @@ function RoomPage() {
     if (!room) return;
     if (room.status === "voting") {
       const key = { status: room.status, round: room.current_round };
-      if (lastVotingPhase.current?.status === key.status && lastVotingPhase.current?.round === key.round) return;
+      if (
+        lastVotingPhase.current?.status === key.status &&
+        lastVotingPhase.current?.round === key.round
+      )
+        return;
       lastVotingPhase.current = key;
-      setTimeout(() => { aiVoteFn({ data: { roomId: room.id } }).catch(() => {}); }, 2000);
+      setTimeout(() => {
+        aiVoteFn({ data: { roomId: room.id } }).catch(() => {});
+      }, 2000);
     }
   }, [room, aiVoteFn]);
 
@@ -131,16 +186,26 @@ function RoomPage() {
 
   // Fetch own role securely (other players' roles are not readable until the case ends)
   useEffect(() => {
-    if (!room || !me) { setMyRole(null); return; }
-    if (room.status === "lobby" || room.status === "ended") { setMyRole(null); return; }
+    if (!room || !me) {
+      setMyRole(null);
+      return;
+    }
+    if (room.status === "lobby" || room.status === "ended") {
+      setMyRole(null);
+      return;
+    }
     supabase.rpc("my_player_role", { _room_id: room.id }).then(({ data }) => {
       setMyRole((data as PlayerRole | null) ?? null);
     });
   }, [room?.id, room?.status, me?.id]);
 
-  const myVote = me ? votes.find((v) => v.voter_player_id === me.id && v.round === room?.current_round) : null;
+  const myVote = me
+    ? votes.find((v) => v.voter_player_id === me.id && v.round === room?.current_round)
+    : null;
   const aliveCount = players.filter((p) => p.alive).length;
-  const secondsLeft = room?.phase_ends_at ? Math.max(0, Math.floor((new Date(room.phase_ends_at).getTime() - now) / 1000)) : null;
+  const secondsLeft = room?.phase_ends_at
+    ? Math.max(0, Math.floor((new Date(room.phase_ends_at).getTime() - now) / 1000))
+    : null;
 
   // Auto-advance when timer hits 0 (host only)
   useEffect(() => {
@@ -157,22 +222,32 @@ function RoomPage() {
     try {
       await sendFn({ data: { roomId: room.id, content: input.trim() } });
       setInput("");
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Send failed"); }
-    finally { setBusy(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Send failed");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleStart() {
     if (!room) return;
     setBusy(true);
-    try { await startFn({ data: { roomId: room.id } }); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Start failed"); }
-    finally { setBusy(false); }
+    try {
+      await startFn({ data: { roomId: room.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Start failed");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleVote(targetId: string) {
     if (!room) return;
-    try { await voteFn({ data: { roomId: room.id, targetPlayerId: targetId } }); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Vote failed"); }
+    try {
+      await voteFn({ data: { roomId: room.id, targetPlayerId: targetId } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Vote failed");
+    }
   }
 
   async function handleLeave() {
@@ -189,25 +264,45 @@ function RoomPage() {
   }
 
   if (!room) {
-    return <div className="min-h-screen grid place-items-center bg-background"><Loader2 className="size-8 animate-spin text-primary" /></div>;
+    return (
+      <div className="min-h-screen grid place-items-center bg-background">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-background relative">
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] -z-10 animate-flicker">
-        <div className="w-full h-full rounded-full animate-glow-pulse" style={{ background: "radial-gradient(ellipse, oklch(0.85 0.16 70 / 0.25) 0%, transparent 70%)" }} />
+        <div
+          className="w-full h-full rounded-full animate-glow-pulse"
+          style={{
+            background: "radial-gradient(ellipse, oklch(0.85 0.16 70 / 0.25) 0%, transparent 70%)",
+          }}
+        />
       </div>
 
       <header className="flex items-center justify-between px-4 sm:px-8 py-4 border-b border-border/40">
         <Link to="/lobby" className="flex items-center gap-2">
           <Eye className="size-5 text-primary" />
-          <span className="font-display text-lg">Mafia<span className="italic text-primary">Mind</span></span>
+          <span className="font-display text-lg">
+            Mafia<span className="italic text-primary">Mind</span>
+          </span>
         </Link>
         <div className="flex items-center gap-3">
-          <button onClick={copyCode} className="font-type tracking-[0.3em] text-xs uppercase text-muted-foreground hover:text-primary flex items-center gap-2">
-            CASE {room.code} {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          <button
+            onClick={copyCode}
+            className="font-type tracking-[0.3em] text-xs uppercase text-muted-foreground hover:text-primary flex items-center gap-2"
+          >
+            CASE {room.code}{" "}
+            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
           </button>
-          <Button variant="ghost" size="sm" onClick={handleLeave} className="font-type tracking-widest text-xs uppercase text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLeave}
+            className="font-type tracking-widest text-xs uppercase text-muted-foreground"
+          >
             <LogOut className="size-3.5 mr-1" /> Exit
           </Button>
         </div>
@@ -235,11 +330,15 @@ function RoomPage() {
                   const mine = p?.user_id === userId;
                   return (
                     <div key={m.id} className={`flex gap-2 ${mine ? "justify-end" : ""}`}>
-                      <div className={`max-w-[75%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
+                      <div
+                        className={`max-w-[75%] ${mine ? "items-end" : "items-start"} flex flex-col`}
+                      >
                         <span className="font-type text-[10px] tracking-widest uppercase text-muted-foreground/70 mb-1">
                           {p?.display_name ?? "?"} {p?.is_ai ? "" : ""}
                         </span>
-                        <div className={`px-3 py-2 rounded-sm font-body text-sm ${mine ? "bg-primary/20 border border-primary/30 text-foreground" : "bg-card border border-border text-foreground/90"}`}>
+                        <div
+                          className={`px-3 py-2 rounded-sm font-body text-sm ${mine ? "bg-primary/20 border border-primary/30 text-foreground" : "bg-card border border-border text-foreground/90"}`}
+                        >
                           {m.content}
                         </div>
                       </div>
@@ -252,18 +351,36 @@ function RoomPage() {
                   <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={room.status === "lobby" ? "Lobby is silent until the case opens" : "Speak your mind..."}
+                    placeholder={
+                      room.status === "lobby"
+                        ? "Lobby is silent until the case opens"
+                        : "Speak your mind..."
+                    }
                     disabled={room.status === "lobby" || busy}
                     className="bg-background/60"
                     maxLength={500}
                   />
-                  <Button type="submit" disabled={room.status === "lobby" || busy || !input.trim()} size="icon" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                  <Button
+                    type="submit"
+                    disabled={room.status === "lobby" || busy || !input.trim()}
+                    size="icon"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {busy ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Send className="size-4" />
+                    )}
                   </Button>
                 </form>
               )}
               {room.status === "voting" && (
-                <VotingPanel players={players} me={me} myVote={myVote?.target_player_id ?? null} onVote={handleVote} />
+                <VotingPanel
+                  players={players}
+                  me={me}
+                  myVote={myVote?.target_player_id ?? null}
+                  onVote={handleVote}
+                />
               )}
             </div>
           )}
@@ -271,46 +388,74 @@ function RoomPage() {
 
         {/* RIGHT: sidebar */}
         <aside className="space-y-4">
-          {me && room.status !== "lobby" && room.status !== "ended" && (
-            <RoleCard role={myRole} />
-          )}
+          {me && room.status !== "lobby" && room.status !== "ended" && <RoleCard role={myRole} />}
 
           {room.status === "lobby" && (
             <div className="bg-card/60 backdrop-blur border border-border rounded-sm p-5">
-              <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">Briefing</div>
+              <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">
+                Briefing
+              </div>
               <h3 className="font-display text-xl mb-3">Suspects gathering</h3>
               <p className="font-body text-sm text-muted-foreground mb-4">
-                Share the code <span className="font-type text-primary">{room.code}</span> to invite players.
-                {room.ai_count} AI infiltrator{room.ai_count > 1 ? "s" : ""} will join when the case opens.
+                Share the code <span className="font-type text-primary">{room.code}</span> to invite
+                players.
+                {room.ai_count} AI infiltrator{room.ai_count > 1 ? "s" : ""} will join when the case
+                opens.
               </p>
               <div className="text-xs font-type tracking-wider text-muted-foreground/70 mb-4">
                 {players.length} / {room.max_players} humans · need 3+ to start
               </div>
               {isHost ? (
-                <Button onClick={handleStart} disabled={busy || players.length < 3} className="w-full font-type tracking-widest text-xs uppercase bg-primary text-primary-foreground hover:bg-primary/90 h-11">
+                <Button
+                  onClick={handleStart}
+                  disabled={busy || players.length < 3}
+                  className="w-full font-type tracking-widest text-xs uppercase bg-primary text-primary-foreground hover:bg-primary/90 h-11"
+                >
                   {busy ? <Loader2 className="size-4 animate-spin" /> : "Open The Case"}
                 </Button>
               ) : (
-                <p className="text-xs font-type tracking-wider text-muted-foreground italic">Waiting for host...</p>
+                <p className="text-xs font-type tracking-wider text-muted-foreground italic">
+                  Waiting for host...
+                </p>
               )}
             </div>
           )}
 
           {isHost && (room.status === "day" || room.status === "voting") && (
             <div className="bg-card/60 backdrop-blur border border-border rounded-sm p-4">
-              <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">Host Controls</div>
-              <Button onClick={() => advanceFn({ data: { roomId: room.id } })} variant="outline" size="sm" className="w-full font-type tracking-widest text-xs uppercase">
+              <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">
+                Host Controls
+              </div>
+              <Button
+                onClick={() => advanceFn({ data: { roomId: room.id } })}
+                variant="outline"
+                size="sm"
+                className="w-full font-type tracking-widest text-xs uppercase"
+              >
                 {room.status === "day" ? "End Discussion → Vote" : "Tally Votes"}
               </Button>
             </div>
           )}
 
           <div className="bg-card/60 backdrop-blur border border-border rounded-sm p-4">
-            <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">Round Status</div>
+            <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">
+              Round Status
+            </div>
             <div className="space-y-2 text-sm font-type">
-              <div className="flex justify-between"><span className="text-muted-foreground">Round</span><span>{room.current_round || "—"}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Alive</span><span>{aliveCount} / {players.length}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Phase</span><span className="capitalize text-primary">{room.status}</span></div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Round</span>
+                <span>{room.current_round || "—"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Alive</span>
+                <span>
+                  {aliveCount} / {players.length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phase</span>
+                <span className="capitalize text-primary">{room.status}</span>
+              </div>
             </div>
           </div>
         </aside>
@@ -320,39 +465,69 @@ function RoomPage() {
 }
 
 function PhaseBanner({ room, secondsLeft }: { room: Room; secondsLeft: number | null }) {
-  const label = room.status === "lobby" ? "Lobby"
-    : room.status === "day" ? `Day ${room.current_round} · Discussion`
-    : room.status === "voting" ? `Day ${room.current_round} · Voting`
-    : "Case Closed";
+  const label =
+    room.status === "lobby"
+      ? "Lobby"
+      : room.status === "day"
+        ? `Day ${room.current_round} · Discussion`
+        : room.status === "voting"
+          ? `Day ${room.current_round} · Voting`
+          : "Case Closed";
   return (
     <div className="border-b border-border/40 bg-card/40 backdrop-blur px-4 sm:px-8 py-3 flex items-center justify-between">
-      <div className="font-type text-xs tracking-[0.3em] uppercase text-muted-foreground">{label}</div>
+      <div className="font-type text-xs tracking-[0.3em] uppercase text-muted-foreground">
+        {label}
+      </div>
       {secondsLeft !== null && room.status !== "lobby" && room.status !== "ended" && (
-        <div className={`font-type text-xs tracking-widest ${secondsLeft < 10 ? "text-destructive animate-pulse" : "text-primary"}`}>
-          {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:{String(secondsLeft % 60).padStart(2, "0")}
+        <div
+          className={`font-type text-xs tracking-widest ${secondsLeft < 10 ? "text-destructive animate-pulse" : "text-primary"}`}
+        >
+          {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
+          {String(secondsLeft % 60).padStart(2, "0")}
         </div>
       )}
     </div>
   );
 }
 
-function PlayerTable({ players, myId, room, votes }: { players: Player[]; myId?: string; room: Room; votes: Vote[] }) {
+function PlayerTable({
+  players,
+  myId,
+  room,
+  votes,
+}: {
+  players: Player[];
+  myId?: string;
+  room: Room;
+  votes: Vote[];
+}) {
   const voteCounts: Record<string, number> = {};
   if (room.status === "voting") {
     for (const v of votes) {
-      if (v.round === room.current_round) voteCounts[v.target_player_id] = (voteCounts[v.target_player_id] ?? 0) + 1;
+      if (v.round === room.current_round)
+        voteCounts[v.target_player_id] = (voteCounts[v.target_player_id] ?? 0) + 1;
     }
   }
   return (
     <div className="bg-card/40 backdrop-blur border border-border rounded-sm p-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {players.map((p) => (
-          <div key={p.id} className={`relative px-3 py-2 rounded-sm border text-xs font-type ${
-            !p.alive ? "border-destructive/30 bg-destructive/5 opacity-50" :
-            p.id === myId ? "border-primary/60 bg-primary/10" : "border-border bg-background/40"
-          }`}>
+          <div
+            key={p.id}
+            className={`relative px-3 py-2 rounded-sm border text-xs font-type ${
+              !p.alive
+                ? "border-destructive/30 bg-destructive/5 opacity-50"
+                : p.id === myId
+                  ? "border-primary/60 bg-primary/10"
+                  : "border-border bg-background/40"
+            }`}
+          >
             <div className="flex items-center gap-1.5">
-              {p.is_ai ? <Bot className="size-3 text-accent" /> : <User className="size-3 text-muted-foreground" />}
+              {p.is_ai ? (
+                <Bot className="size-3 text-accent" />
+              ) : (
+                <User className="size-3 text-muted-foreground" />
+              )}
               {p.user_id === room.host_id && <Crown className="size-3 text-primary" />}
               {!p.alive && <Skull className="size-3 text-destructive" />}
               <span className="truncate tracking-wider">{p.display_name}</span>
@@ -370,13 +545,33 @@ function PlayerTable({ players, myId, room, votes }: { players: Player[]; myId?:
 }
 
 function RoleCard({ role }: { role: PlayerRole | null }) {
-  const cfg = role === "detective" ? { Icon: Search, label: "Detective", desc: "Find the AI traitor. Survive the vote.", color: "text-primary border-primary/40 bg-primary/10" }
-    : role === "accomplice" ? { Icon: ShieldAlert, label: "Accomplice", desc: "Blend in. Mislead. Survive.", color: "text-accent border-accent/40 bg-accent/10" }
-    : { Icon: User, label: "Suspect", desc: "Survive. Vote out the traitor.", color: "text-foreground border-border bg-card/60" };
+  const cfg =
+    role === "detective"
+      ? {
+          Icon: Search,
+          label: "Detective",
+          desc: "Find the AI traitor. Survive the vote.",
+          color: "text-primary border-primary/40 bg-primary/10",
+        }
+      : role === "accomplice"
+        ? {
+            Icon: ShieldAlert,
+            label: "Accomplice",
+            desc: "Blend in. Mislead. Survive.",
+            color: "text-accent border-accent/40 bg-accent/10",
+          }
+        : {
+            Icon: User,
+            label: "Suspect",
+            desc: "Survive. Vote out the traitor.",
+            color: "text-foreground border-border bg-card/60",
+          };
   const { Icon } = cfg;
   return (
     <div className={`backdrop-blur border rounded-sm p-5 ${cfg.color}`}>
-      <div className="font-type text-[10px] tracking-[0.4em] uppercase opacity-70 mb-2">Your Role</div>
+      <div className="font-type text-[10px] tracking-[0.4em] uppercase opacity-70 mb-2">
+        Your Role
+      </div>
       <div className="flex items-center gap-3">
         <Icon className="size-8" strokeWidth={1.5} />
         <div>
@@ -388,20 +583,39 @@ function RoleCard({ role }: { role: PlayerRole | null }) {
   );
 }
 
-function VotingPanel({ players, me, myVote, onVote }: { players: Player[]; me?: Player; myVote: string | null; onVote: (id: string) => void }) {
+function VotingPanel({
+  players,
+  me,
+  myVote,
+  onVote,
+}: {
+  players: Player[];
+  me?: Player;
+  myVote: string | null;
+  onVote: (id: string) => void;
+}) {
   const targets = players.filter((p) => p.alive && p.id !== me?.id);
   return (
     <div className="border-t border-border/40 p-4">
-      <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">Cast Your Vote</div>
+      <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">
+        Cast Your Vote
+      </div>
       {!me?.alive ? (
-        <p className="text-xs text-muted-foreground italic">You were eliminated. Watch the case unfold.</p>
+        <p className="text-xs text-muted-foreground italic">
+          You were eliminated. Watch the case unfold.
+        </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {targets.map((p) => (
-            <button key={p.id} onClick={() => onVote(p.id)}
+            <button
+              key={p.id}
+              onClick={() => onVote(p.id)}
               className={`px-3 py-2 rounded-sm border text-xs font-type tracking-wider transition-all ${
-                myVote === p.id ? "border-primary bg-primary/20 text-primary" : "border-border hover:border-foreground/40"
-              }`}>
+                myVote === p.id
+                  ? "border-primary bg-primary/20 text-primary"
+                  : "border-border hover:border-foreground/40"
+              }`}
+            >
               {p.display_name}
             </button>
           ))}
@@ -414,7 +628,9 @@ function VotingPanel({ players, me, myVote, onVote }: { players: Player[]; me?: 
 function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
   const aliveAI = players.filter((p) => p.is_ai && p.alive).length;
   const humansWin = aliveAI === 0;
-  const [heatmap, setHeatmap] = useState<Array<{ observer_player_id: string; target_player_id: string; score: number; round: number }>>([]);
+  const [heatmap, setHeatmap] = useState<
+    Array<{ observer_player_id: string; target_player_id: string; score: number; round: number }>
+  >([]);
   const [roles, setRoles] = useState<Record<string, PlayerRole>>({});
   useEffect(() => {
     supabase
@@ -443,13 +659,27 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
 
   return (
     <div className="bg-card/60 backdrop-blur border border-border rounded-sm p-8 text-center">
-      <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">Case Closed</div>
+      <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3">
+        Case Closed
+      </div>
       <h2 className="font-display text-4xl mb-4">
-        {humansWin ? <>The humans <span className="italic text-primary">prevailed</span></> : <>The AI <span className="italic text-accent">walked free</span></>}
+        {humansWin ? (
+          <>
+            The humans <span className="italic text-primary">prevailed</span>
+          </>
+        ) : (
+          <>
+            The AI <span className="italic text-accent">walked free</span>
+          </>
+        )}
       </h2>
       <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-md mx-auto">
         {players.map((p) => (
-          <Badge key={p.id} variant="outline" className="justify-start gap-2 px-3 py-2 font-type text-xs">
+          <Badge
+            key={p.id}
+            variant="outline"
+            className="justify-start gap-2 px-3 py-2 font-type text-xs"
+          >
             {p.is_ai ? <Bot className="size-3 text-accent" /> : <User className="size-3" />}
             <span className="truncate">{p.display_name}</span>
             <span className="ml-auto text-[10px] uppercase opacity-60">{roles[p.id] ?? "—"}</span>
@@ -459,7 +689,9 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
 
       {aiPlayers.length > 0 && latest.size > 0 && (
         <div className="mt-10 text-left">
-          <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3 text-center">AI Suspicion Heatmap</div>
+          <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-3 text-center">
+            AI Suspicion Heatmap
+          </div>
           <p className="font-body text-xs text-muted-foreground/80 mb-4 text-center italic">
             How suspicious the AI agents found every player — their private reasoning, revealed.
           </p>
@@ -467,9 +699,16 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
             <table className="mx-auto text-xs font-type border border-border/60">
               <thead>
                 <tr className="bg-card/60">
-                  <th className="px-3 py-2 text-left tracking-widest uppercase text-muted-foreground">AI →</th>
+                  <th className="px-3 py-2 text-left tracking-widest uppercase text-muted-foreground">
+                    AI →
+                  </th>
                   {targets.map((t) => (
-                    <th key={t.id} className="px-3 py-2 text-left tracking-wider text-muted-foreground/80">{t.display_name}</th>
+                    <th
+                      key={t.id}
+                      className="px-3 py-2 text-left tracking-wider text-muted-foreground/80"
+                    >
+                      {t.display_name}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -480,7 +719,11 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
                     {targets.map((t) => {
                       const score = latest.get(`${ai.id}:${t.id}`);
                       if (score === undefined || ai.id === t.id) {
-                        return <td key={t.id} className="px-3 py-2 text-muted-foreground/30">—</td>;
+                        return (
+                          <td key={t.id} className="px-3 py-2 text-muted-foreground/30">
+                            —
+                          </td>
+                        );
                       }
                       const intensity = Math.min(1, score / 100);
                       return (
@@ -505,7 +748,10 @@ function EndScreen({ players, roomId }: { players: Player[]; roomId: string }) {
         </div>
       )}
 
-      <Link to="/lobby" className="inline-block mt-8 font-type tracking-widest text-xs uppercase text-primary hover:underline">
+      <Link
+        to="/lobby"
+        className="inline-block mt-8 font-type tracking-widest text-xs uppercase text-primary hover:underline"
+      >
         ← Back to Lobby
       </Link>
     </div>

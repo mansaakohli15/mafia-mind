@@ -58,12 +58,17 @@ function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden px-4">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,oklch(0.10_0.015_40)_85%)] -z-10" />
       <div className="w-full max-w-md relative">
-        <Link to="/" className="flex items-center gap-2 mb-8 text-muted-foreground hover:text-primary transition-colors font-type text-xs tracking-widest uppercase">
+        <Link
+          to="/"
+          className="flex items-center gap-2 mb-8 text-muted-foreground hover:text-primary transition-colors font-type text-xs tracking-widest uppercase"
+        >
           <Eye className="size-4" /> Mafia Mind
         </Link>
 
         <div className="bg-card/70 backdrop-blur-md border border-border rounded-sm p-8 shadow-2xl">
-          <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">Case File · Recovery</div>
+          <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-2">
+            Case File · Recovery
+          </div>
           <h1 className="font-display text-3xl mb-6">Set a new password</h1>
 
           {!ready ? (
@@ -73,20 +78,53 @@ function ResetPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="password" className="font-type text-[10px] tracking-widest uppercase text-muted-foreground">New password</Label>
-                <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 bg-background/60" />
+                <Label
+                  htmlFor="password"
+                  className="font-type text-[10px] tracking-widest uppercase text-muted-foreground"
+                >
+                  New password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1.5 bg-background/60"
+                />
               </div>
               <div>
-                <Label htmlFor="confirm" className="font-type text-[10px] tracking-widest uppercase text-muted-foreground">Confirm password</Label>
-                <Input id="confirm" type="password" required minLength={6} value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1.5 bg-background/60" />
+                <Label
+                  htmlFor="confirm"
+                  className="font-type text-[10px] tracking-widest uppercase text-muted-foreground"
+                >
+                  Confirm password
+                </Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="mt-1.5 bg-background/60"
+                />
               </div>
-              <Button type="submit" disabled={loading} className="w-full h-11 font-type tracking-widest text-xs uppercase bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 font-type tracking-widest text-xs uppercase bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 {loading ? <Loader2 className="size-4 animate-spin" /> : "Update Password"}
               </Button>
             </form>
           )}
 
-          <Link to="/auth" className="mt-6 block text-center text-xs font-type tracking-wider text-muted-foreground hover:text-primary transition-colors">
+          <Link
+            to="/auth"
+            className="mt-6 block text-center text-xs font-type tracking-wider text-muted-foreground hover:text-primary transition-colors"
+          >
             Back to sign in
           </Link>
         </div>

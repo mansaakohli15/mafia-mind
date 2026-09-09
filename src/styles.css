@@ -69,25 +69,25 @@
    */
   --radius: 0.25rem;
 
-  --background: oklch(0.17 0.022 45);          /* deep tobacco brown */
-  --foreground: oklch(0.92 0.028 80);          /* aged parchment */
+  --background: oklch(0.17 0.022 45); /* deep tobacco brown */
+  --foreground: oklch(0.92 0.028 80); /* aged parchment */
 
-  --card: oklch(0.22 0.028 50);                /* leather folder */
+  --card: oklch(0.22 0.028 50); /* leather folder */
   --card-foreground: oklch(0.92 0.028 80);
 
-  --popover: oklch(0.20 0.025 48);
+  --popover: oklch(0.2 0.025 48);
   --popover-foreground: oklch(0.92 0.028 80);
 
-  --primary: oklch(0.74 0.155 65);             /* tungsten amber */
+  --primary: oklch(0.74 0.155 65); /* tungsten amber */
   --primary-foreground: oklch(0.15 0.02 45);
 
-  --secondary: oklch(0.28 0.03 55);            /* darker leather */
+  --secondary: oklch(0.28 0.03 55); /* darker leather */
   --secondary-foreground: oklch(0.92 0.028 80);
 
   --muted: oklch(0.25 0.025 50);
-  --muted-foreground: oklch(0.62 0.035 70);    /* dusty sepia */
+  --muted-foreground: oklch(0.62 0.035 70); /* dusty sepia */
 
-  --accent: oklch(0.50 0.185 27);              /* blood red — case-string */
+  --accent: oklch(0.5 0.185 27); /* blood red — case-string */
   --accent-foreground: oklch(0.96 0.02 80);
 
   --destructive: oklch(0.55 0.22 27);
@@ -98,12 +98,12 @@
   --ring: oklch(0.74 0.155 65);
 
   --chart-1: oklch(0.74 0.155 65);
-  --chart-2: oklch(0.50 0.185 27);
+  --chart-2: oklch(0.5 0.185 27);
   --chart-3: oklch(0.62 0.035 70);
-  --chart-4: oklch(0.40 0.08 45);
+  --chart-4: oklch(0.4 0.08 45);
   --chart-5: oklch(0.85 0.08 80);
 
-  --sidebar: oklch(0.20 0.025 48);
+  --sidebar: oklch(0.2 0.025 48);
   --sidebar-foreground: oklch(0.92 0.028 80);
   --sidebar-primary: oklch(0.74 0.155 65);
   --sidebar-primary-foreground: oklch(0.15 0.02 45);
@@ -113,10 +113,10 @@
   --sidebar-ring: oklch(0.74 0.155 65);
 
   /* Custom design tokens */
-  --tungsten: oklch(0.78 0.17 70);             /* warm lamp glow */
+  --tungsten: oklch(0.78 0.17 70); /* warm lamp glow */
   --tungsten-soft: oklch(0.82 0.13 75);
-  --case-red: oklch(0.50 0.20 27);             /* red string / police tape */
-  --evidence-cream: oklch(0.88 0.04 85);       /* paper highlight */
+  --case-red: oklch(0.5 0.2 27); /* red string / police tape */
+  --evidence-cream: oklch(0.88 0.04 85); /* paper highlight */
   --shadow-noir: 0 25px 60px -20px oklch(0 0 0 / 0.8), 0 8px 24px -8px oklch(0 0 0 / 0.5);
   --shadow-lamp: 0 0 80px oklch(0.78 0.17 70 / 0.35), 0 0 200px oklch(0.78 0.17 70 / 0.15);
 
@@ -142,7 +142,7 @@
     font-family: var(--font-body);
     background-image:
       radial-gradient(ellipse at top right, oklch(0.78 0.17 70 / 0.08), transparent 60%),
-      radial-gradient(ellipse at bottom left, oklch(0.50 0.20 27 / 0.05), transparent 50%);
+      radial-gradient(ellipse at bottom left, oklch(0.5 0.2 27 / 0.05), transparent 50%);
     background-attachment: fixed;
   }
 
@@ -162,56 +162,125 @@
 /* ============================================================
  * Typography utility classes
  * ============================================================ */
-.font-display { font-family: var(--font-display); }
-.font-type { font-family: var(--font-type); }
-.font-body { font-family: var(--font-body); }
+.font-display {
+  font-family: var(--font-display);
+}
+.font-type {
+  font-family: var(--font-type);
+}
+.font-body {
+  font-family: var(--font-body);
+}
 
 /* ============================================================
  * Animations: flickering lamp, eye-blink, typewriter
  * ============================================================ */
 @keyframes lamp-flicker {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  43% { opacity: 0.92; filter: brightness(0.85); }
-  45% { opacity: 1; filter: brightness(1.05); }
-  47% { opacity: 0.88; filter: brightness(0.8); }
-  49% { opacity: 1; filter: brightness(1); }
-  72% { opacity: 0.96; filter: brightness(0.95); }
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  43% {
+    opacity: 0.92;
+    filter: brightness(0.85);
+  }
+  45% {
+    opacity: 1;
+    filter: brightness(1.05);
+  }
+  47% {
+    opacity: 0.88;
+    filter: brightness(0.8);
+  }
+  49% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  72% {
+    opacity: 0.96;
+    filter: brightness(0.95);
+  }
 }
 
 @keyframes lamp-glow-pulse {
-  0%, 100% { opacity: 0.85; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.02); }
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
 }
 
 @keyframes vignette-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.55; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 @keyframes blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  94%, 98% { transform: scaleY(0.05); }
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  98% {
+    transform: scaleY(0.05);
+  }
 }
 
 @keyframes typewriter-cursor {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes tape-sway {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(-3.5deg); }
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(-3.5deg);
+  }
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-flicker { animation: lamp-flicker 6s infinite; }
-.animate-glow-pulse { animation: lamp-glow-pulse 4s ease-in-out infinite; }
-.animate-vignette { animation: vignette-pulse 7s ease-in-out infinite; }
-.animate-fade-up { animation: fade-up 0.8s ease-out both; }
+.animate-flicker {
+  animation: lamp-flicker 6s infinite;
+}
+.animate-glow-pulse {
+  animation: lamp-glow-pulse 4s ease-in-out infinite;
+}
+.animate-vignette {
+  animation: vignette-pulse 7s ease-in-out infinite;
+}
+.animate-fade-up {
+  animation: fade-up 0.8s ease-out both;
+}
 
 /* ============================================================
  * Police-tape pattern utility

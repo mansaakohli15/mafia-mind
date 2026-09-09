@@ -18,8 +18,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Mafia Mind — Spot the AI Among Us" },
       {
         property: "og:description",
-        content:
-          "A real-time social deduction game where one secret player is an AI agent.",
+        content: "A real-time social deduction game where one secret player is an AI agent.",
       },
     ],
   }),
@@ -65,11 +64,22 @@ function Index() {
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 font-type text-xs tracking-widest uppercase text-muted-foreground">
-          <a href="#how" className="hover:text-primary transition-colors">The Case</a>
-          <a href="#roles" className="hover:text-primary transition-colors">Roles</a>
-          <a href="#why" className="hover:text-primary transition-colors">Why It Matters</a>
+          <a href="#how" className="hover:text-primary transition-colors">
+            The Case
+          </a>
+          <a href="#roles" className="hover:text-primary transition-colors">
+            Roles
+          </a>
+          <a href="#why" className="hover:text-primary transition-colors">
+            Why It Matters
+          </a>
         </nav>
-        <Button asChild variant="outline" size="sm" className="font-type tracking-widest text-xs uppercase border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground">
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="font-type tracking-widest text-xs uppercase border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground"
+        >
           <Link to="/auth">Sign In</Link>
         </Button>
       </header>
@@ -89,17 +99,27 @@ function Index() {
             </h1>
             <p className="font-body text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed">
               A real-time social deduction game where a single AI agent infiltrates your lobby —
-              lying, deflecting, and forming alliances. Find it before the bodies pile up.
-              Or, if fate deals you the wrong card, <em className="text-foreground/90">become</em> the deceiver.
+              lying, deflecting, and forming alliances. Find it before the bodies pile up. Or, if
+              fate deals you the wrong card, <em className="text-foreground/90">become</em> the
+              deceiver.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-12">
-              <Button asChild size="lg" className="font-type tracking-widest text-xs uppercase h-14 px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-8px_oklch(0.78_0.17_70/0.6)]">
+              <Button
+                asChild
+                size="lg"
+                className="font-type tracking-widest text-xs uppercase h-14 px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-8px_oklch(0.78_0.17_70/0.6)]"
+              >
                 <Link to="/lobby">
                   <Plus className="size-4 mr-2" /> Open New Case
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="font-type tracking-widest text-xs uppercase h-14 px-8 border-foreground/20 hover:bg-foreground/5">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="font-type tracking-widest text-xs uppercase h-14 px-8 border-foreground/20 hover:bg-foreground/5"
+              >
                 <Link to="/lobby">
                   <KeyRound className="size-4 mr-2" /> Enter With Code
                 </Link>
@@ -108,9 +128,15 @@ function Index() {
 
             {/* "Stat" line, typewriter style */}
             <div className="font-type text-xs tracking-wider text-muted-foreground/80 flex flex-wrap gap-x-6 gap-y-2">
-              <span><span className="text-primary">94%</span> human detection rate</span>
-              <span><span className="text-primary">7.2s</span> avg AI response</span>
-              <span><span className="text-primary">8–12</span> players per case</span>
+              <span>
+                <span className="text-primary">94%</span> human detection rate
+              </span>
+              <span>
+                <span className="text-primary">7.2s</span> avg AI response
+              </span>
+              <span>
+                <span className="text-primary">8–12</span> players per case
+              </span>
             </div>
           </div>
 
@@ -134,7 +160,10 @@ function Index() {
 
             {/* Lower police tape */}
             <div className="absolute -bottom-2 -right-8 left-16 z-20 pointer-events-none">
-              <PoliceTape rotate={3} text="EVIDENCE · CHAIN OF CUSTODY · CASE 007 · DO NOT TAMPER" />
+              <PoliceTape
+                rotate={3}
+                text="EVIDENCE · CHAIN OF CUSTODY · CASE 007 · DO NOT TAMPER"
+              />
             </div>
           </div>
         </div>
@@ -142,14 +171,19 @@ function Index() {
 
       {/* Police tape banner */}
       <div className="relative z-10 -my-4">
-        <PoliceTape rotate={-1.5} text="WARNING · AI IMPOSTER ACTIVE · TRUST NO ONE · WARNING · AI IMPOSTER ACTIVE · TRUST NO ONE" />
+        <PoliceTape
+          rotate={-1.5}
+          text="WARNING · AI IMPOSTER ACTIVE · TRUST NO ONE · WARNING · AI IMPOSTER ACTIVE · TRUST NO ONE"
+        />
       </div>
 
       {/* HOW IT WORKS */}
       <section id="how" className="relative z-10 px-6 sm:px-12 py-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-fade-up">
-            <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-4">The Investigation</div>
+            <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-4">
+              The Investigation
+            </div>
             <h2 className="font-display text-4xl sm:text-5xl text-foreground">
               Three phases. <span className="italic text-primary">One impostor.</span>
             </h2>
@@ -157,9 +191,24 @@ function Index() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { n: "I", title: "The Briefing", body: "Roles are dealt in secret. Villager, Detective, or Mafia. One seat at the table is filled by an AI agent — even the host doesn't know who.", icon: Eye },
-              { n: "II", title: "The Deliberation", body: "Day phase opens. Accuse, defend, alibi, deflect. The AI reads chat history, builds suspicion scores, and adapts its strategy round by round.", icon: Brain },
-              { n: "III", title: "The Verdict", body: "Cast your vote. Most-suspected player is eliminated. When the dust settles, see if you correctly identified the machine — or if it walked free.", icon: Vote },
+              {
+                n: "I",
+                title: "The Briefing",
+                body: "Roles are dealt in secret. Villager, Detective, or Mafia. One seat at the table is filled by an AI agent — even the host doesn't know who.",
+                icon: Eye,
+              },
+              {
+                n: "II",
+                title: "The Deliberation",
+                body: "Day phase opens. Accuse, defend, alibi, deflect. The AI reads chat history, builds suspicion scores, and adapts its strategy round by round.",
+                icon: Brain,
+              },
+              {
+                n: "III",
+                title: "The Verdict",
+                body: "Cast your vote. Most-suspected player is eliminated. When the dust settles, see if you correctly identified the machine — or if it walked free.",
+                icon: Vote,
+              },
             ].map(({ n, title, body, icon: Icon }, i) => (
               <div
                 key={n}
@@ -170,7 +219,10 @@ function Index() {
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 size-4 rounded-full bg-accent shadow-[0_2px_6px_rgba(0,0,0,0.6)] ring-2 ring-accent/30" />
                 <div className="flex items-baseline justify-between mb-6">
                   <span className="font-display italic text-5xl text-primary/70">{n}</span>
-                  <Icon className="size-6 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
+                  <Icon
+                    className="size-6 text-muted-foreground group-hover:text-primary transition-colors"
+                    strokeWidth={1.5}
+                  />
                 </div>
                 <h3 className="font-display text-2xl text-foreground mb-3">{title}</h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed">{body}</p>
@@ -187,30 +239,49 @@ function Index() {
       <section id="roles" className="relative z-10 px-6 sm:px-12 py-24 border-t border-border/50">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5 animate-fade-up">
-            <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-4">The Suspects</div>
+            <div className="font-type text-[10px] tracking-[0.4em] uppercase text-accent mb-4">
+              The Suspects
+            </div>
             <h2 className="font-display text-4xl sm:text-5xl text-foreground mb-6">
               Who's <span className="italic text-primary">really</span> at the table?
             </h2>
             <p className="font-body text-muted-foreground leading-relaxed mb-6">
-              Each player draws a role from the deck. The AI draws too — and plays it
-              with conversational memory, role-aware reasoning, and a per-player
-              suspicion model that updates every round.
+              Each player draws a role from the deck. The AI draws too — and plays it with
+              conversational memory, role-aware reasoning, and a per-player suspicion model that
+              updates every round.
             </p>
             <p className="font-type text-xs tracking-wider text-muted-foreground/70 italic">
-              "It blamed me at 11:42. By 11:48 it was defending the same player it accused.
-              I should have noticed sooner." — Case Report #003
+              "It blamed me at 11:42. By 11:48 it was defending the same player it accused. I should
+              have noticed sooner." — Case Report #003
             </p>
           </div>
 
           <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
             {[
-              { role: "Villager", desc: "Find the impostors. Survive the vote.", color: "text-foreground" },
+              {
+                role: "Villager",
+                desc: "Find the impostors. Survive the vote.",
+                color: "text-foreground",
+              },
               { role: "Mafia", desc: "Lie convincingly. Eliminate quietly.", color: "text-accent" },
-              { role: "Detective", desc: "Investigate one player per night.", color: "text-primary" },
-              { role: "?_AI_AGENT", desc: "Any role. No tell. Adapts to you.", color: "text-primary" },
+              {
+                role: "Detective",
+                desc: "Investigate one player per night.",
+                color: "text-primary",
+              },
+              {
+                role: "?_AI_AGENT",
+                desc: "Any role. No tell. Adapts to you.",
+                color: "text-primary",
+              },
             ].map((r) => (
-              <div key={r.role} className="bg-card/50 border border-border p-6 rounded-sm hover:bg-card/80 transition-colors">
-                <div className={`font-type text-sm tracking-widest uppercase mb-2 ${r.color}`}>{r.role}</div>
+              <div
+                key={r.role}
+                className="bg-card/50 border border-border p-6 rounded-sm hover:bg-card/80 transition-colors"
+              >
+                <div className={`font-type text-sm tracking-widest uppercase mb-2 ${r.color}`}>
+                  {r.role}
+                </div>
                 <div className="font-body text-sm text-muted-foreground">{r.desc}</div>
               </div>
             ))}
@@ -226,7 +297,11 @@ function Index() {
             The most dangerous lie <br />
             is the one that <span className="italic text-primary">sounds</span> human.
           </h2>
-          <Button asChild size="lg" className="font-type tracking-widest text-xs uppercase h-14 px-10 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button
+            asChild
+            size="lg"
+            className="font-type tracking-widest text-xs uppercase h-14 px-10 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             <Link to="/auth">Begin Interrogation</Link>
           </Button>
         </div>
@@ -236,7 +311,9 @@ function Index() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 font-type text-[10px] tracking-[0.25em] uppercase text-muted-foreground/60">
           <div>Mafia Mind · Case File © {new Date().getFullYear()}</div>
           <div className="flex items-center gap-6">
-            <Link to="/trust" className="hover:text-primary">Trust &amp; Privacy</Link>
+            <Link to="/trust" className="hover:text-primary">
+              Trust &amp; Privacy
+            </Link>
             <span>All Suspects Are Innocent Until Voted Out</span>
           </div>
         </div>

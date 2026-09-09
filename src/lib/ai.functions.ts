@@ -2,16 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText, generateObject } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { getGoogleProvider } from "./gemini.server";
 
-const MODEL = "google/gemini-3-flash-preview";
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 export const triggerAiTurn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ roomId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    if (!key) throw new Error("Missing GEMINI_API_KEY (or GOOGLE_GENERATIVE_AI_API_KEY)");
     const { supabase } = context;
 
     const { data: room } = await supabase.from("rooms").select("*").eq("id", data.roomId).single();
@@ -19,7 +19,11 @@ export const triggerAiTurn = createServerFn({ method: "POST" })
 
     // Role is column-restricted from authenticated; read full rows via admin
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: players } = await supabaseAdmin.from("room_players").select("*").eq("room_id", data.roomId).order("seat");
+    const { data: players } = await supabaseAdmin
+      .from("room_players")
+      .select("*")
+      .eq("room_id", data.roomId)
+      .order("seat");
     if (!players) return { skipped: true };
 
     const aliveAIs = players.filter((p) => p.is_ai && p.alive);
@@ -42,19 +46,22 @@ export const triggerAiTurn = createServerFn({ method: "POST" })
     const transcript = recent
       .map((m) => `${nameById.get(m.player_id) ?? "?"}: ${m.content}`)
       .join("\n");
-    const roster = players.filter((p) => p.alive && p.id !== ai.id).map((p) => p.display_name).join(", ");
+    const roster = players
+      .filter((p) => p.alive && p.id !== ai.id)
+      .map((p) => p.display_name)
+      .join(", ");
 
     const roleHint =
       ai.role === "accomplice"
         ? "You are the secret traitor. Subtly deflect suspicion away from yourself and onto others. Never admit anything. Sound human and warm."
         : ai.role === "detective"
-        ? "You are the detective. Probe others' inconsistencies but do not reveal your role outright."
-        : "You are a regular townsperson trying to find the traitor.";
+          ? "You are the detective. Probe others' inconsistencies but do not reveal your role outright."
+          : "You are a regular townsperson trying to find the traitor.";
 
-    const provider = createLovableAiGatewayProvider(key);
+    const google = getGoogleProvider(key);
 
     const { text } = await generateText({
-      model: provider(MODEL),
+      model: google(MODEL),
       system: `You are ${ai.display_name}, a player in a social-deduction game. Persona: ${ai.ai_persona}. ${roleHint}
 CRITICAL RULES:
 - Reply with ONE short line, 5 to 30 words. Lowercase casual chat style.
@@ -65,7 +72,10 @@ CRITICAL RULES:
       prompt: `Recent table chat (this round ${room.current_round}):\n${transcript}\n\nYour next message as ${ai.display_name}:`,
     });
 
-    const clean = text.trim().replace(/^["'`]+|["'`]+$/g, "").slice(0, 280);
+    const clean = text
+      .trim()
+      .replace(/^["'`]+|["'`]+$/g, "")
+      .slice(0, 280);
     await supabaseAdmin.from("messages").insert({
       room_id: data.roomId,
       player_id: ai.id,
@@ -78,7 +88,7 @@ CRITICAL RULES:
     try {
       const targets = players.filter((p) => p.alive && p.id !== ai.id);
       const { object } = await generateObject({
-        model: provider(MODEL),
+        model: google(MODEL),
         schema: z.object({
           scores: z.array(
             z.object({
@@ -120,7 +130,10 @@ export const aiVote = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: room } = await supabase.from("rooms").select("*").eq("id", data.roomId).single();
     if (!room || room.status !== "voting") return { skipped: true };
-    const { data: players } = await supabase.from("room_players").select("*").eq("room_id", data.roomId);
+    const { data: players } = await supabase
+      .from("room_players")
+      .select("*")
+      .eq("room_id", data.roomId);
     if (!players) return { skipped: true };
     const ais = players.filter((p) => p.is_ai && p.alive);
     const targets = players.filter((p) => p.alive && !p.is_ai);
@@ -144,7 +157,12 @@ export const aiVote = createServerFn({ method: "POST" })
       }
       if (!target) continue;
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin.from("votes").delete().eq("room_id", data.roomId).eq("round", room.current_round).eq("voter_player_id", ai.id);
+      await supabaseAdmin
+        .from("votes")
+        .delete()
+        .eq("room_id", data.roomId)
+        .eq("round", room.current_round)
+        .eq("voter_player_id", ai.id);
       await supabaseAdmin.from("votes").insert({
         room_id: data.roomId,
         round: room.current_round,

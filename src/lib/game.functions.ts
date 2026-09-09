@@ -4,7 +4,10 @@ import { z } from "zod";
 
 const AI_PERSONAS = [
   { name: "Marlowe", persona: "tired but sharp ex-cop, dry humor, short sentences" },
-  { name: "Veda", persona: "polite analyst, asks lots of clarifying questions, careful with claims" },
+  {
+    name: "Veda",
+    persona: "polite analyst, asks lots of clarifying questions, careful with claims",
+  },
   { name: "Rook", persona: "blue-collar mechanic, blunt, suspicious of fancy talk" },
   { name: "Lila", persona: "warm bartender, defuses arguments, remembers small details" },
   { name: "Quentin", persona: "anxious accountant, over-explains, talks fast" },
@@ -24,13 +27,28 @@ function genCode() {
 
 export const createRoom = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ aiCount: z.number().min(1).max(2).default(1), maxPlayers: z.number().min(4).max(8).default(6) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        aiCount: z.number().min(1).max(2).default(1),
+        maxPlayers: z.number().min(4).max(8).default(6),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", userId)
+      .maybeSingle();
     let code = genCode();
     for (let i = 0; i < 5; i++) {
-      const { data: existing } = await supabase.from("rooms").select("id").eq("code", code).maybeSingle();
+      const { data: existing } = await supabase
+        .from("rooms")
+        .select("id")
+        .eq("code", code)
+        .maybeSingle();
       if (!existing) break;
       code = genCode();
     }
@@ -56,13 +74,24 @@ export const joinRoom = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const code = data.code.toUpperCase();
-    const { data: room, error } = await supabase.from("rooms").select("*").eq("code", code).maybeSingle();
+    const { data: room, error } = await supabase
+      .from("rooms")
+      .select("*")
+      .eq("code", code)
+      .maybeSingle();
     if (error || !room) throw new Error("Room not found");
     if (room.status !== "lobby") throw new Error("Game already started");
-    const { data: players } = await supabase.from("room_players").select("seat, user_id").eq("room_id", room.id);
+    const { data: players } = await supabase
+      .from("room_players")
+      .select("seat, user_id")
+      .eq("room_id", room.id);
     if (players?.some((p) => p.user_id === userId)) return room;
     if ((players?.length ?? 0) >= room.max_players) throw new Error("Room full");
-    const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", userId)
+      .maybeSingle();
     const nextSeat = (players?.length ?? 0) + 1;
     const { error: ie } = await supabase.from("room_players").insert({
       room_id: room.id,
@@ -78,7 +107,11 @@ export const leaveRoom = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ roomId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await context.supabase.from("room_players").delete().eq("room_id", data.roomId).eq("user_id", context.userId);
+    await context.supabase
+      .from("room_players")
+      .delete()
+      .eq("room_id", data.roomId)
+      .eq("user_id", context.userId);
     return { ok: true };
   });
 
@@ -91,7 +124,11 @@ export const startGame = createServerFn({ method: "POST" })
     if (!room || room.host_id !== userId) throw new Error("Only host can start");
     // Need access to role column for assignment; use admin client (host already verified above)
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: humans } = await supabaseAdmin.from("room_players").select("*").eq("room_id", data.roomId).order("seat");
+    const { data: humans } = await supabaseAdmin
+      .from("room_players")
+      .select("*")
+      .eq("room_id", data.roomId)
+      .order("seat");
     if (!humans || humans.length < 3) throw new Error("Need at least 3 humans");
 
     // Add AI players
@@ -110,7 +147,10 @@ export const startGame = createServerFn({ method: "POST" })
       };
     });
     void usedSeats;
-    const { data: aiInserted, error: aiErr } = await supabaseAdmin.from("room_players").insert(aiRows).select();
+    const { data: aiInserted, error: aiErr } = await supabaseAdmin
+      .from("room_players")
+      .insert(aiRows)
+      .select();
     if (aiErr) throw aiErr;
 
     // Assign roles: 1 detective, 1 accomplice (traitor), rest suspects
@@ -119,7 +159,8 @@ export const startGame = createServerFn({ method: "POST" })
     const assignments: { id: string; role: "detective" | "accomplice" | "suspect" }[] = [];
     assignments.push({ id: shuffled[0].id, role: "detective" });
     assignments.push({ id: shuffled[1].id, role: "accomplice" });
-    for (let i = 2; i < shuffled.length; i++) assignments.push({ id: shuffled[i].id, role: "suspect" });
+    for (let i = 2; i < shuffled.length; i++)
+      assignments.push({ id: shuffled[i].id, role: "suspect" });
     for (const a of assignments) {
       await supabaseAdmin.from("room_players").update({ role: a.role }).eq("id", a.id);
     }
@@ -135,12 +176,23 @@ export const startGame = createServerFn({ method: "POST" })
 
 export const sendMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ roomId: z.string().uuid(), content: z.string().min(1).max(500) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ roomId: z.string().uuid(), content: z.string().min(1).max(500) }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: me } = await supabase.from("room_players").select("id, alive").eq("room_id", data.roomId).eq("user_id", userId).maybeSingle();
+    const { data: me } = await supabase
+      .from("room_players")
+      .select("id, alive")
+      .eq("room_id", data.roomId)
+      .eq("user_id", userId)
+      .maybeSingle();
     if (!me || !me.alive) throw new Error("Cannot speak");
-    const { data: room } = await supabase.from("rooms").select("status, current_round").eq("id", data.roomId).single();
+    const { data: room } = await supabase
+      .from("rooms")
+      .select("status, current_round")
+      .eq("id", data.roomId)
+      .single();
     if (!room) throw new Error("No room");
     const { error } = await supabase.from("messages").insert({
       room_id: data.roomId,
@@ -155,14 +207,30 @@ export const sendMessage = createServerFn({ method: "POST" })
 
 export const castVote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ roomId: z.string().uuid(), targetPlayerId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ roomId: z.string().uuid(), targetPlayerId: z.string().uuid() }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: me } = await supabase.from("room_players").select("id, alive").eq("room_id", data.roomId).eq("user_id", userId).maybeSingle();
+    const { data: me } = await supabase
+      .from("room_players")
+      .select("id, alive")
+      .eq("room_id", data.roomId)
+      .eq("user_id", userId)
+      .maybeSingle();
     if (!me || !me.alive) throw new Error("Cannot vote");
-    const { data: room } = await supabase.from("rooms").select("current_round, status").eq("id", data.roomId).single();
+    const { data: room } = await supabase
+      .from("rooms")
+      .select("current_round, status")
+      .eq("id", data.roomId)
+      .single();
     if (!room || room.status !== "voting") throw new Error("Not voting phase");
-    await supabase.from("votes").delete().eq("room_id", data.roomId).eq("round", room.current_round).eq("voter_player_id", me.id);
+    await supabase
+      .from("votes")
+      .delete()
+      .eq("room_id", data.roomId)
+      .eq("round", room.current_round)
+      .eq("voter_player_id", me.id);
     const { error } = await supabase.from("votes").insert({
       room_id: data.roomId,
       round: room.current_round,
@@ -183,7 +251,10 @@ export const advancePhase = createServerFn({ method: "POST" })
 
     if (room.status === "day") {
       const phaseEnd = new Date(Date.now() + 45_000).toISOString();
-      await supabase.from("rooms").update({ status: "voting", phase_ends_at: phaseEnd }).eq("id", room.id);
+      await supabase
+        .from("rooms")
+        .update({ status: "voting", phase_ends_at: phaseEnd })
+        .eq("id", room.id);
       return { ok: true };
     }
 
@@ -199,21 +270,32 @@ export const advancePhase = createServerFn({ method: "POST" })
       let eliminated: string | null = null;
       let max = 0;
       for (const [pid, n] of Object.entries(tally)) {
-        if (n > max) { max = n; eliminated = pid; }
+        if (n > max) {
+          max = n;
+          eliminated = pid;
+        }
       }
       if (eliminated) {
         await supabase.from("room_players").update({ alive: false }).eq("id", eliminated);
       }
       // Check win condition
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: alive } = await supabaseAdmin.from("room_players").select("id, is_ai, role").eq("room_id", room.id).eq("alive", true);
+      const { data: alive } = await supabaseAdmin
+        .from("room_players")
+        .select("id, is_ai, role")
+        .eq("room_id", room.id)
+        .eq("alive", true);
       const aliveAI = alive?.filter((p) => p.is_ai).length ?? 0;
       const totalAlive = alive?.length ?? 0;
       let ended = false;
-      if (aliveAI === 0) ended = true; // humans win
+      if (aliveAI === 0)
+        ended = true; // humans win
       else if (aliveAI * 2 >= totalAlive) ended = true; // AI wins
       if (ended) {
-        await supabase.from("rooms").update({ status: "ended", phase_ends_at: null }).eq("id", room.id);
+        await supabase
+          .from("rooms")
+          .update({ status: "ended", phase_ends_at: null })
+          .eq("id", room.id);
       } else {
         const phaseEnd = new Date(Date.now() + 120_000).toISOString();
         await supabase
